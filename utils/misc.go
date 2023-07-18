@@ -10,7 +10,7 @@ func Assert(guard bool, text string) {
 
 func Setup(errs ...error) {
 	for _, e := range errs {
-		Assert(e == nil, fmt.Sprintf("setup panic: %v", e))
+		Assert(e == nil, "setup panic")
 	}
 }
 
