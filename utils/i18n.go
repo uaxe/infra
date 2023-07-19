@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"container/list"
 	"fmt"
 	"io/fs"
 	"net/http"
@@ -89,6 +90,11 @@ func (self *defaultI18n) Append(i18nDir string) error {
 	return loadI18n(self.i18nVals, i18nDir)
 }
 
+type Ele struct {
+	key   string
+	value any
+}
+
 func loadI18n(i18nVals map[string]string, i18nDir string) error {
 	locker.Lock()
 	defer locker.Unlock()
@@ -103,14 +109,25 @@ func loadI18n(i18nVals map[string]string, i18nDir string) error {
 				return er
 			}
 			fiPath := fmt.Sprintf("%s/%s", i18nDir, info.Name())
-			values := make(map[string]string)
+			values := make(map[string]any)
 			err = conf.Load(fiPath, &values)
 			if err != nil {
 				return err
 			}
 			lang := strings.TrimSuffix(info.Name(), filepath.Ext(info.Name()))
-			for k, v := range values {
-				i18nVals[langKey(lang, k)] = v
+
+			l := list.New()
+			l.PushBack(Ele{key: lang, value: values})
+			for e := l.Front(); e != nil; e = e.Next() {
+				ele := e.Value.(Ele)
+				switch ele.value.(type) {
+				case string:
+					i18nVals[ele.key] = ele.value.(string)
+				case map[string]any:
+					for k, v := range ele.value.(map[string]any) {
+						l.PushBack(Ele{key: langKey(ele.key, k), value: v})
+					}
+				}
 			}
 		}
 		return nil
