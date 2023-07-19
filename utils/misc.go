@@ -1,7 +1,5 @@
 package utils
 
-import "fmt"
-
 func Assert(guard bool, text string) {
 	if !guard {
 		panic(text)
