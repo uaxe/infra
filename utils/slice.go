@@ -40,11 +40,19 @@ func SliceFind[M ~[]V, V any](m M, f func(V) bool) int {
 	return -1
 }
 
-func SliceMap[M ~[]V, V any](m M, f func(V) bool) {
+func SliceRange[M ~[]V, V any](m M, f func(V) bool) {
 	for _, v := range m {
 		if !f(v) {
 			return
 		}
 	}
 	return
+}
+
+func Slice2MapStruct(m ...any) map[any]struct{} {
+	ms := make(map[any]struct{}, len(m))
+	for _, v := range m {
+		ms[v] = struct{}{}
+	}
+	return ms
 }
