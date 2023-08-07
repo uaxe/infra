@@ -64,7 +64,7 @@ func (self *_plugins) Exists(name string) bool {
 }
 
 func (self *_plugins) Register(public, private *gin.RouterGroup, skip func(IPlugin) bool) {
-	SliceMap(self.r, func(p IPlugin) bool {
+	SliceRange(self.r, func(p IPlugin) bool {
 		if skip != nil && !skip(p) {
 			prefix := p.RouterPrefix()
 			p.Register(public.Group(prefix), private.Group(prefix))
