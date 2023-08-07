@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -21,7 +20,7 @@ func Load(fpath string, val any, opts ...OptionFunc) error {
 	ext := filepath.Ext(fpath)
 	dirver, ok := dirvers[ext]
 	if !ok {
-		return errors.New(fmt.Sprintf("%s dirver not support", ext))
+		return fmt.Errorf("%s dirver not support", ext)
 	}
 	fi, err := os.Open(fpath)
 	if err != nil {

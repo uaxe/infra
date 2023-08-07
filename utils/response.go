@@ -6,7 +6,15 @@ import (
 	"net/http"
 )
 
-const (
+type Response struct {
+	Status int    `json:"status"`
+	Data   any    `json:"data"`
+	Msg    string `json:"msg"`
+}
+
+var (
+	DefaultRender = defaultRender{}
+
 	StatusOK    = http.StatusOK
 	StatusError = http.StatusInternalServerError
 
@@ -14,14 +22,20 @@ const (
 	MsgFAIL = "FAIL"
 )
 
-type Response struct {
-	Code int    `json:"code"`
-	Data any    `json:"data"`
-	Msg  string `json:"msg"`
+type Responser interface {
+	Render(c *gin.Context, status int, data any, msg string)
 }
 
-func Render(c *gin.Context, code int, data any, msg string) {
-	c.Render(http.StatusOK, render.JSON{Data: Response{code, data, msg}})
+var _ Responser = (*defaultRender)(nil)
+
+type defaultRender struct{}
+
+func (r *defaultRender) Render(c *gin.Context, status int, data any, msg string) {
+	c.Render(http.StatusOK, render.JSON{Data: Response{status, data, msg}})
+}
+
+func Render(c *gin.Context, status int, data any, msg string) {
+	DefaultRender.Render(c, status, data, msg)
 }
 
 func OK(c *gin.Context) {
