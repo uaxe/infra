@@ -27,6 +27,9 @@ func Load(fpath string, val any, opts ...OptionFunc) error {
 		return err
 	}
 	defer fi.Close()
+	if _, err = fi.Stat(); err != nil {
+		return err
+	}
 	raw, err := io.ReadAll(fi)
 	if err != nil {
 		return err
