@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"axe/core/schedule"
+	"github.com/uaxe/infra/core/schedule"
 )
 
 type Entry struct {

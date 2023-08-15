@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	redis "github.com/redis/go-redis/v9"
+	"github.com/redis/go-redis/v9"
 	"github.com/uaxe/infra/core/threading"
 )
 
