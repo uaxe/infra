@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// 测试gpool队列
 func TestGPool_Queue(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	gpool := NewLimitPool(ctx, 100)
@@ -57,7 +56,6 @@ func TestGPool_Queue(t *testing.T) {
 	cancel()
 }
 
-// 测试下batch
 func TestNewBatch(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	gpool := NewLimitPool(ctx, 100)

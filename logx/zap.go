@@ -2,7 +2,7 @@ package logx
 
 import (
 	"errors"
-	"github.com/uaxe/infra/core/logx/zapx"
+	"github.com/uaxe/infra/logx/zapx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"

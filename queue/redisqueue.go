@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/uaxe/infra/core/threading"
+	"github.com/uaxe/infra/threading"
 )
 
 type IQueue interface {

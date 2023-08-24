@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/uaxe/infra/core/schedule"
+	"github.com/uaxe/infra/schedule"
 )
 
 var tw = schedule.NewTimerWheel(100*time.Millisecond, 10)

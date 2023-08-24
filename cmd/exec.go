@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -34,17 +33,14 @@ func ExecCmd(ctx context.Context, name string, args ...string) ([]byte, error) {
 	return outputBuf.Bytes(), nil
 }
 
-//写入文件到目标文件夹
 func WriteFileToDir(dirPath string, r io.Reader, fileID string) (string, error) {
-	//如果不存在则则需要创建
 	if _, err := os.Lstat(dirPath); nil != err {
-		//首先创建存储路径
-		err := os.MkdirAll(dirPath, os.ModePerm)
+		err = os.MkdirAll(dirPath, os.ModePerm)
 		if err != nil {
 			return "", fmt.Errorf("MkdirAll Fail|%v", err)
 		}
 	}
-	//创建临时文件
+
 	filePath := fmt.Sprintf("%s/%s", strings.TrimSuffix(dirPath, "/"), fileID)
 
 	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
@@ -63,8 +59,7 @@ func WriteFileToDir(dirPath string, r io.Reader, fileID string) (string, error) 
 
 func MkdirAll(dirPath string) error {
 	if _, err := os.Lstat(dirPath); nil != err {
-		//首先创建存储路径
-		err := os.MkdirAll(dirPath, os.ModePerm)
+		err = os.MkdirAll(dirPath, os.ModePerm)
 		if err != nil {
 			return fmt.Errorf("MkdirAll Fail|%v", err)
 		}
@@ -72,9 +67,8 @@ func MkdirAll(dirPath string) error {
 	return nil
 }
 
-//	写入临时文件
 func WriteTempFile(tempFilePrefix string, r io.Reader) (*os.File, error) {
-	file, err := ioutil.TempFile(os.TempDir(), tempFilePrefix)
+	file, err := os.CreateTemp(os.TempDir(), tempFilePrefix)
 	if nil != err {
 		return nil, err
 	}

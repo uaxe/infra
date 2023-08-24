@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/uaxe/infra/core/conf"
+	"github.com/uaxe/infra/conf"
 )
 
 const (
@@ -57,19 +57,19 @@ func langKey(lang, key string) string {
 	return fmt.Sprintf("%s.%s", lang, strings.ToLower(key))
 }
 
-func (self *defaultI18n) HttpValue(req *http.Request, key, defaultVal string, params ...string) string {
-	return self.LangValue(HttpLanguage(req), key, defaultVal, params...)
+func (i *defaultI18n) HttpValue(req *http.Request, key, defaultVal string, params ...string) string {
+	return i.LangValue(HttpLanguage(req), key, defaultVal, params...)
 }
 
-func (self *defaultI18n) LangValue(lang, key, defaultVal string, params ...string) string {
+func (i *defaultI18n) LangValue(lang, key, defaultVal string, params ...string) string {
 	locker.RLock()
 	defer locker.RUnlock()
 
 	lkey := langKey(lang, key)
-	val, ok := self.i18nVals[lkey]
+	val, ok := i.i18nVals[lkey]
 	paramsVal := make([]string, 0, len(params))
 	for _, v := range params {
-		pval, pok := self.i18nVals[lkey]
+		pval, pok := i.i18nVals[lkey]
 		if pok {
 			paramsVal = append(paramsVal, langKey(lang, pval))
 		} else {
@@ -85,11 +85,11 @@ func (self *defaultI18n) LangValue(lang, key, defaultVal string, params ...strin
 	return defaultVal
 }
 
-func (self *defaultI18n) Append(i18nDir string) error {
-	if self.i18nVals == nil {
-		self.i18nVals = make(map[string]string)
+func (i *defaultI18n) Append(i18nDir string) error {
+	if i.i18nVals == nil {
+		i.i18nVals = make(map[string]string)
 	}
-	return loadI18n(self.i18nVals, i18nDir)
+	return loadI18n(i.i18nVals, i18nDir)
 }
 
 type Ele struct {

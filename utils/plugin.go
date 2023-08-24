@@ -22,16 +22,16 @@ type (
 	}
 )
 
-func (self *defaultIPlugin) Name() string {
-	return self.name
+func (p *defaultIPlugin) Name() string {
+	return p.name
 }
 
-func (self *defaultIPlugin) RouterPrefix() string {
-	return self.prefix
+func (p *defaultIPlugin) RouterPrefix() string {
+	return p.prefix
 }
 
-func (self *defaultIPlugin) Register(public, private *gin.RouterGroup) {
-	self.register(public, private)
+func (p *defaultIPlugin) Register(public, private *gin.RouterGroup) {
+	p.register(public, private)
 }
 
 func GetPlugin() *_plugins {
@@ -49,22 +49,22 @@ func AddPlugin(name, prefix string, register func(public, private *gin.RouterGro
 
 var _defaultPlugin = new(_plugins)
 
-func (self *_plugins) Add(r IPlugin) *_plugins {
-	if self.r == nil {
-		self.r = make([]IPlugin, 0)
+func (p *_plugins) Add(r IPlugin) *_plugins {
+	if p.r == nil {
+		p.r = make([]IPlugin, 0)
 	}
-	self.r = append(self.r, r)
-	return self
+	p.r = append(p.r, r)
+	return p
 }
 
-func (self *_plugins) Exists(name string) bool {
-	return SliceFind(self.r, func(p IPlugin) bool {
+func (p *_plugins) Exists(name string) bool {
+	return SliceFind(p.r, func(p IPlugin) bool {
 		return strings.EqualFold(p.Name(), name)
 	}) >= 0
 }
 
-func (self *_plugins) Register(public, private *gin.RouterGroup, skip func(IPlugin) bool) {
-	SliceRange(self.r, func(p IPlugin) bool {
+func (p *_plugins) Register(public, private *gin.RouterGroup, skip func(IPlugin) bool) {
+	SliceRange(p.r, func(p IPlugin) bool {
 		if skip != nil && !skip(p) {
 			prefix := p.RouterPrefix()
 			p.Register(public.Group(prefix), private.Group(prefix))

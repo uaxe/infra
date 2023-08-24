@@ -3,7 +3,7 @@ package httpx
 import (
 	"net/http"
 
-	"github.com/uaxe/infra/core/mapping"
+	"github.com/uaxe/infra/mapping"
 )
 
 type ResponseParse interface {

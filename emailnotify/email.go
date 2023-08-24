@@ -15,7 +15,6 @@ import (
 )
 
 var (
-	// email 地址正则表达式
 	p = regexp.MustCompile(`^([\w]+\.*)([\w]+)\@[\w]+\.\w{3}(\.\w{2}|)$`)
 
 	Err_Incorrect = errors.New("incorrect email address format")
@@ -106,7 +105,7 @@ type Mail struct {
 	auth smtp.Auth
 }
 
-// NewMail 创建Mail
+// NewMail
 func NewMail(options ...Option) *Mail {
 	opt := &option{
 		SMTPPort: 25,
@@ -154,7 +153,6 @@ func (m *Mail) writeHeader(w io.Writer, header map[string]string) error {
 	return nil
 }
 
-// Send 根据 模板发送邮件
 func (m *Mail) Send(subject string, content MessageImplementer) (err error) {
 	if m.To.Len() == 0 {
 		return

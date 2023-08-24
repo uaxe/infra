@@ -59,7 +59,7 @@ func Time() time.Time {
 	return initTime.Add(Now())
 }
 
-func Repr(v interface{}) string {
+func Repr(v any) string {
 	if v == nil {
 		return ""
 	}
