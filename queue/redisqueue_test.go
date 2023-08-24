@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +38,7 @@ func TestQueue(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
-	time.Sleep(20 * time.Second)
+	time.Sleep(10 * time.Second)
 	rediscli.Del(context.Background(), qname)
 }
 
@@ -53,7 +53,7 @@ func TestGroup(t *testing.T) {
 
 	var err error
 
-	// rediscli.XGroupCreate(stream, group, "0").Result()
+	rediscli.XGroupCreate(context.Background(), stream, group, "0").Result()
 
 	go func() {
 		consumers := []string{"ME", "YOU"}
@@ -146,6 +146,6 @@ func TestQueueManager(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
-	time.Sleep(20 * time.Second)
+	time.Sleep(10 * time.Second)
 	rediscli.Del(context.Background(), "test", "test2")
 }

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/uaxe/infra/core/internal/bytesconv"
-	"github.com/uaxe/infra/core/internal/json"
+	"github.com/uaxe/infra/internal/bytesconv"
+	"github.com/uaxe/infra/internal/json"
 )
 
 var errUnknownType = errors.New("unknown type")

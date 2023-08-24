@@ -15,8 +15,8 @@ type Response struct {
 var (
 	DefaultRender = defaultRender{}
 
-	StatusOK    = http.StatusOK
-	StatusError = http.StatusInternalServerError
+	StatusOK    = 0
+	StatusError = 100
 
 	MsgOK   = "OK"
 	MsgFAIL = "FAIL"
