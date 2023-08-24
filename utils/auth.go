@@ -2,8 +2,10 @@ package utils
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
+	"errors"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type (
@@ -45,6 +47,10 @@ func (auth *_auths) Add(r IAuth) *_auths {
 	auth.r = append(auth.r, r)
 	return auth
 }
+
+var (
+	ErrFailedAuthentication = errors.New("incorrect Username or Password")
+)
 
 func (auth *_auths) Authenticator(c *gin.Context, req AuthReq) (*AuthResp, error) {
 	for i := range auth.r {
