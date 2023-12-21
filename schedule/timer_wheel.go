@@ -59,7 +59,7 @@ func (h *TimerHeap) Pop() any {
 var timerIds uint32 = 0
 
 const (
-	MIN_INTERVAL = 100 * time.Millisecond
+	MinInterval = 100 * time.Millisecond
 )
 
 func timerId() uint32 {
@@ -79,8 +79,8 @@ type TimerWheel struct {
 
 func NewTimerWheel(interval time.Duration, workSize int) *TimerWheel {
 
-	if int64(interval)-int64(MIN_INTERVAL) < 0 {
-		interval = MIN_INTERVAL
+	if int64(interval)-int64(MinInterval) < 0 {
+		interval = MinInterval
 	}
 
 	tw := &TimerWheel{

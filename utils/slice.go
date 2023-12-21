@@ -49,8 +49,8 @@ func SliceRange[M ~[]V, V any](m M, f func(V) bool) {
 	return
 }
 
-func Slice2MapStruct(m ...any) map[any]struct{} {
-	ms := make(map[any]struct{}, len(m))
+func Slice2Map[M ~[]V, V comparable](m M) map[V]struct{} {
+	ms := make(map[V]struct{}, len(m))
 	for _, v := range m {
 		ms[v] = struct{}{}
 	}

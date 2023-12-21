@@ -9,12 +9,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/uaxe/infra/conf"
+	"github.com/uaxe/infra/zconf"
 )
 
 const (
-	LANG_DEFAULT = "zh-CN"
-	ACCEPT_LANG  = "Accept-Language"
+	LangDefault = "zh-CN"
+	AcceptLang  = "Accept-Language"
 )
 
 type I18n interface {
@@ -43,9 +43,9 @@ func InitI18n(i18nDir string) (I18n, error) {
 }
 
 func HttpLanguage(req *http.Request) string {
-	lang := req.Header.Get(ACCEPT_LANG)
+	lang := req.Header.Get(AcceptLang)
 	if len(lang) <= 0 {
-		lang = LANG_DEFAULT
+		lang = LangDefault
 	}
 	if strings.Index(lang, ",") > 0 {
 		lang = lang[:strings.Index(lang, ",")]
@@ -112,7 +112,7 @@ func loadI18n(i18nVals map[string]string, i18nDir string) error {
 			}
 			fiPath := fmt.Sprintf("%s/%s", i18nDir, info.Name())
 			values := make(map[string]any)
-			err = conf.Load(fiPath, &values)
+			err = zconf.Load(fiPath, &values)
 			if err != nil {
 				return err
 			}
