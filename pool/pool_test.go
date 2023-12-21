@@ -181,7 +181,7 @@ func TestGPool_Cancel(t *testing.T) {
 	for _, wu := range wus {
 		resp, err := wu.Get()
 		fmt.Printf("%v|%v\n", err, resp)
-		if err != nil && err != ERR_QUEUE_CONTEXT_DONE {
+		if err != nil && err != ErrQueueContextDone {
 			fmt.Printf("Should Not Timeout %v|%v\n", err, resp)
 			t.FailNow()
 		}
@@ -204,8 +204,4 @@ func TestGPool_Cancel(t *testing.T) {
 	}
 
 	cancel()
-
-	//ch := make(chan string,1)
-	//close(ch)
-	//close(ch)
 }

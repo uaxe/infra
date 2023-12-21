@@ -86,7 +86,7 @@ func BenchmarkLRUCache_Put(pb *testing.B) {
 	}()
 	pb.StartTimer()
 	pb.RunParallel(func(pb *testing.PB) {
-		rand.Seed(time.Now().UnixNano())
+		rand.New(rand.NewSource(time.Now().UnixNano()))
 		for pb.Next() {
 			id := rand.Intn(10000)
 			c.Get(fmt.Sprintf("10077%d", id))

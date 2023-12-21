@@ -13,7 +13,7 @@ type WorkUnit struct {
 	once  sync.Once
 	ch    chan *any //future
 	work  WorkFunc
-	Value interface{}
+	Value any
 	Err   error
 }
 
@@ -50,7 +50,7 @@ type GPool struct {
 }
 
 func NewLimitPool(ctx context.Context, maxcapacity int) *GPool {
-	limiter := make(chan interface{}, maxcapacity)
+	limiter := make(chan any, maxcapacity)
 	ctx, cancel := context.WithCancel(ctx)
 	return &GPool{
 		ctx:     ctx,
@@ -59,9 +59,10 @@ func NewLimitPool(ctx context.Context, maxcapacity int) *GPool {
 	}
 }
 
-var ERR_QUEUE_TIMEOUT = errors.New("Queue TIMEOUT!")
-
-var ERR_QUEUE_CONTEXT_DONE = errors.New("Context is Done!")
+var (
+	ErrQueueTimeout     = errors.New("queue timeout")
+	ErrQueueContextDone = errors.New("context is done")
+)
 
 func (p *GPool) Queue(ctx context.Context, work WorkFunc) (*WorkUnit, error) {
 	wu := &WorkUnit{ch: make(chan *any, 1), work: work, ctx: ctx}
@@ -71,7 +72,7 @@ func (p *GPool) Queue(ctx context.Context, work WorkFunc) (*WorkUnit, error) {
 func (p *GPool) queue(wu *WorkUnit) error {
 	select {
 	case <-wu.ctx.Done():
-		wu.Error(ERR_QUEUE_CONTEXT_DONE)
+		wu.Error(ErrQueueContextDone)
 		return wu.Err
 	case p.limiter <- nil:
 		go func() {
@@ -85,10 +86,10 @@ func (p *GPool) queue(wu *WorkUnit) error {
 
 			select {
 			case <-p.ctx.Done():
-				wu.Error(ERR_QUEUE_CONTEXT_DONE)
+				wu.Error(ErrQueueContextDone)
 				return
 			case <-wu.ctx.Done():
-				wu.Error(ERR_QUEUE_CONTEXT_DONE)
+				wu.Error(ErrQueueContextDone)
 				return
 			default:
 			}
@@ -100,7 +101,7 @@ func (p *GPool) queue(wu *WorkUnit) error {
 			}
 		}()
 	case <-p.ctx.Done():
-		wu.Error(ERR_QUEUE_CONTEXT_DONE)
+		wu.Error(ErrQueueContextDone)
 		return wu.Err
 	}
 	return nil
@@ -112,6 +113,7 @@ func (p *GPool) Monitor() (int, int) {
 
 func (p *GPool) Close() {
 	p.cancel()
+	close(p.limiter)
 }
 
 type Batch struct {
@@ -141,7 +143,7 @@ func (p *Batch) Wait(ctx context.Context) ([]*WorkUnit, error) {
 		}
 		err := p.gopool.queue(wu)
 		if nil != err {
-			if err == ERR_QUEUE_TIMEOUT {
+			if err == ErrQueueTimeout {
 
 			}
 		}
@@ -153,14 +155,14 @@ func (p *Batch) Wait(ctx context.Context) ([]*WorkUnit, error) {
 		case <-p.gopool.ctx.Done():
 			for j := i; j < len(wus); j++ {
 				if nil == wus[j].Err {
-					wus[j].Error(ERR_QUEUE_CONTEXT_DONE)
+					wus[j].Error(ErrQueueTimeout)
 				}
 			}
 			return wus, nil
 		case <-wus[i].ctx.Done():
 			for j := i; j < len(wus); j++ {
 				if nil == wus[j].Err {
-					wus[j].Error(ERR_QUEUE_CONTEXT_DONE)
+					wus[j].Error(ErrQueueTimeout)
 				}
 			}
 			return wus, nil

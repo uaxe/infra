@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/uaxe/infra/conf"
+	"github.com/uaxe/infra/zconf"
 )
 
 const (
@@ -112,7 +112,7 @@ func loadI18n(i18nVals map[string]string, i18nDir string) error {
 			}
 			fiPath := fmt.Sprintf("%s/%s", i18nDir, info.Name())
 			values := make(map[string]any)
-			err = conf.Load(fiPath, &values)
+			err = zconf.Load(fiPath, &values)
 			if err != nil {
 				return err
 			}
