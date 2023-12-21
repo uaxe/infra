@@ -1,4 +1,4 @@
-package cmd
+package utils
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -36,16 +37,15 @@ func ExecCmd(ctx context.Context, name string, args ...string) ([]byte, error) {
 	return outputBuf.Bytes(), nil
 }
 
-func WriteFileToDir(dirPath string, r io.Reader, fileID string) (string, error) {
-	if _, err := os.Lstat(dirPath); nil != err {
-		err = os.MkdirAll(dirPath, os.ModePerm)
+func WriteFileToDir(dir string, r io.Reader, fname string) (string, error) {
+	if _, err := os.Lstat(dir); nil != err {
+		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			return "", fmt.Errorf("MkdirAll Fail|%v", err)
+			return "", fmt.Errorf("mkdir  fail %v", err)
 		}
 	}
 
-	filePath := fmt.Sprintf("%s/%s", strings.TrimSuffix(dirPath, "/"), fileID)
-
+	filePath := filepath.Join(dir, fname)
 	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if nil != err {
 		return "", err
