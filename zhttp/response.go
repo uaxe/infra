@@ -1,7 +1,12 @@
 package zhttp
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
 	"net/http"
+
+	"github.com/uaxe/infra/utils"
 )
 
 type ResponseParse interface {
@@ -10,24 +15,38 @@ type ResponseParse interface {
 	ParseBody(*http.Response, any) error
 }
 
-var _ ResponseParse = (*DefaultParse)(nil)
+var (
+	_                ResponseParse = (*defaultParse)(nil)
+	DefaultRespParse               = &defaultParse{}
+)
 
-type DefaultParse struct{}
+type defaultParse struct{}
 
-func (self *DefaultParse) Parse(r *http.Response, obj any) error {
-	if err := self.ParseHeader(r, obj); err != nil {
-		return err
-	}
+func (self *defaultParse) Parse(r *http.Response, obj any) error {
 	if err := self.ParseBody(r, obj); err != nil {
 		return err
 	}
+
+	if err := self.ParseHeader(r, obj); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (self *DefaultParse) ParseHeader(r *http.Response, obj any) error {
-	return nil
+func (self *defaultParse) ParseHeader(r *http.Response, obj any) error {
+	return utils.HeaderParser.Parse(r.Header, obj)
 }
 
-func (self *DefaultParse) ParseBody(r *http.Response, obj any) error {
+func (self *defaultParse) ParseBody(r *http.Response, obj any) error {
+	switch r.Header.Get("Content-Type") {
+	case "application/json":
+		raw, err := io.ReadAll(r.Body)
+		if err != nil {
+			return err
+		}
+		r.Body = io.NopCloser(bytes.NewReader(raw))
+		return json.Unmarshal(raw, obj)
+	}
 	return nil
 }
