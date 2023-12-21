@@ -11,7 +11,7 @@ require (
 	golang.org/x/crypto v0.11.0
 	gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405
 	gopkg.in/yaml.v3 v3.0.1
-	gorm.io/gorm v1.25.2
+	gorm.io/gorm v1.25.5
 )
 
 require (
