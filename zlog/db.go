@@ -19,10 +19,12 @@ type dbLog struct {
 func NewDbLog(log *zap.Logger, config logger.Config) logger.Interface {
 	return &dbLog{Log: log, Config: config}
 }
+
 func (db *dbLog) LogMode(level logger.LogLevel) logger.Interface {
 	db.LogLevel = level
 	return db
 }
+
 func (db *dbLog) Info(ctx context.Context, msg string, data ...interface{}) {
 	if db.LogLevel < logger.Info {
 		return
@@ -34,7 +36,7 @@ func (db *dbLog) Warn(ctx context.Context, msg string, data ...interface{}) {
 	if db.LogLevel < logger.Warn {
 		return
 	}
-	db.Log.Warn("db ware:"+msg, zap.Any("data", data))
+	db.Log.Warn("db warn:"+msg, zap.Any("data", data))
 }
 
 func (db *dbLog) Error(ctx context.Context, msg string, data ...interface{}) {
@@ -59,7 +61,7 @@ func (db *dbLog) Trace(ctx context.Context, begin time.Time, fc func() (sql stri
 	case elapsed > db.SlowThreshold && db.SlowThreshold != 0 && db.LogLevel >= logger.Warn:
 		sql, rows := fc()
 		sql = formatSql(sql)
-		db.Log.Info("db trace ware:", zap.String("file", file), zap.Int("line", line), zap.String("func", funcName), zap.Duration("SLOW SQL>=", db.SlowThreshold), zap.Int64("rows", rows), zap.String("sql", sql))
+		db.Log.Info("db trace warn:", zap.String("file", file), zap.Int("line", line), zap.String("func", funcName), zap.Duration("SLOW SQL>=", db.SlowThreshold), zap.Int64("rows", rows), zap.String("sql", sql))
 	case db.LogLevel == logger.Info:
 		sql, rows := fc()
 		sql = formatSql(sql)

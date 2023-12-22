@@ -1,8 +1,6 @@
 package zlog
 
 import (
-	"errors"
-	"os"
 	"strings"
 
 	"go.uber.org/zap"
@@ -13,9 +11,6 @@ import (
 
 func Zap(directory, prefix, format, stacktraceKey, level,
 	encoderLevel string, showLine bool, opts ...zapx.OptionFunc) (*zap.Logger, error) {
-	if ok, _ := PathExists(directory); !ok {
-		_ = os.Mkdir(directory, os.ModePerm)
-	}
 	fileRotate, err := zapx.NewFileRotateLogs(directory, opts...)
 	if err != nil {
 		return nil, err
@@ -64,18 +59,4 @@ func ZapLevel(level string) zapcore.Level {
 	default:
 		return zapcore.DebugLevel
 	}
-}
-
-func PathExists(path string) (bool, error) {
-	fi, err := os.Stat(path)
-	if err == nil {
-		if fi.IsDir() {
-			return true, nil
-		}
-		return false, errors.New("same name exists")
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
 }

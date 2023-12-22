@@ -1,6 +1,7 @@
 package zapx
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -105,6 +106,9 @@ func (self *FileRotatelogs) levelPath(level string) string {
 func (self *FileRotatelogs) GetWriteSyncer(level string) (zapcore.WriteSyncer, error) {
 	writer := make([]zapcore.WriteSyncer, 0, 2)
 	if self.option.fileWriter {
+		if ok, _ := PathExists(self.option.directory); !ok {
+			_ = os.Mkdir(self.option.directory, os.ModePerm)
+		}
 		fileWriter, err := rotatelogs.New(
 			self.levelPath(level),
 			rotatelogs.WithClock(rotatelogs.Local),
@@ -120,4 +124,18 @@ func (self *FileRotatelogs) GetWriteSyncer(level string) (zapcore.WriteSyncer, e
 		writer = append(writer, zapcore.AddSync(os.Stdout))
 	}
 	return zapcore.NewMultiWriteSyncer(writer...), nil
+}
+
+func PathExists(path string) (bool, error) {
+	fi, err := os.Stat(path)
+	if err == nil {
+		if fi.IsDir() {
+			return true, nil
+		}
+		return false, errors.New("same name exists")
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
