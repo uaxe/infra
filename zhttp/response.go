@@ -3,10 +3,9 @@ package zhttp
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/uaxe/infra/binder"
 	"io"
 	"net/http"
-
-	"github.com/uaxe/infra/utils"
 )
 
 type ResponseParse interface {
@@ -35,7 +34,7 @@ func (self *defaultParse) Parse(r *http.Response, obj any) error {
 }
 
 func (self *defaultParse) ParseHeader(r *http.Response, obj any) error {
-	return utils.HeaderParser.Parse(r.Header, obj)
+	return binder.Header.Binding(r.Header, obj)
 }
 
 func (self *defaultParse) ParseBody(r *http.Response, obj any) error {

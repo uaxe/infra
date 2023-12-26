@@ -1,4 +1,4 @@
-package utils
+package assert
 
 func Setup(fn func(err error), errs ...error) {
 	for _, e := range errs {

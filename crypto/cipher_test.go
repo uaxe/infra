@@ -4,9 +4,8 @@ import (
 	"io"
 	"math/rand"
 	"strings"
+	"testing"
 	"time"
-
-	. "gopkg.in/check.v1"
 )
 
 var (
@@ -27,12 +26,7 @@ func RandLowStr(n int) string {
 	return strings.ToLower(RandStr(n))
 }
 
-type CryptoSuite struct {
-}
-
-var _ = Suite(&CryptoSuite{})
-
-func (s *CryptoSuite) TestAesCtr(c *C) {
+func TestAesCtr(t *testing.T) {
 	var cipherData CipherData
 	cipherData.RandomKeyIv(32, 16)
 	cipher, _ := newAesCtr(cipherData)
@@ -43,19 +37,31 @@ func (s *CryptoSuite) TestAesCtr(c *C) {
 	encrypter.Close()
 	buff := make([]byte, 10)
 	n, err := encrypter.Read(buff)
-	c.Assert(n, Equals, 0)
-	c.Assert(err, Equals, io.EOF)
+	if n != 0 {
+		t.Fatal("not read empty")
+		return
+	}
+	if err != io.EOF {
+		t.Fatal("not read empty")
+		return
+	}
 
 	deReader := cipher.Encrypt(byteReader)
-	Decrypter := &CryptoDecrypter{Body: byteReader, Decrypter: deReader}
-	Decrypter.Close()
+	decrypter := &CryptoDecrypter{Body: byteReader, Decrypter: deReader}
+	decrypter.Close()
 	buff = make([]byte, 10)
-	n, err = Decrypter.Read(buff)
-	c.Assert(n, Equals, 0)
-	c.Assert(err, Equals, io.EOF)
+	n, err = decrypter.Read(buff)
+	if n != 0 {
+		t.Fatal("not read empty")
+		return
+	}
+	if err != io.EOF {
+		t.Fatal("not read empty")
+		return
+	}
 }
 
-func (s *CryptoSuite) TestAesCfb(c *C) {
+func TestAesCfb(t *testing.T) {
 	var cipherData CipherData
 	cipherData.RandomKeyIv(32, 16)
 	cipher, _ := newAesCfb(cipherData)
@@ -66,14 +72,26 @@ func (s *CryptoSuite) TestAesCfb(c *C) {
 	encrypter.Close()
 	buff := make([]byte, 10)
 	n, err := encrypter.Read(buff)
-	c.Assert(n, Equals, 0)
-	c.Assert(err, Equals, io.EOF)
+	if n != 0 {
+		t.Fatal("not read empty")
+		return
+	}
+	if err != io.EOF {
+		t.Fatal("not read empty")
+		return
+	}
 
 	deReader := cipher.Encrypt(byteReader)
-	Decrypter := &CryptoDecrypter{Body: byteReader, Decrypter: deReader}
-	Decrypter.Close()
+	decrypter := &CryptoDecrypter{Body: byteReader, Decrypter: deReader}
+	decrypter.Close()
 	buff = make([]byte, 10)
-	n, err = Decrypter.Read(buff)
-	c.Assert(n, Equals, 0)
-	c.Assert(err, Equals, io.EOF)
+	n, err = decrypter.Read(buff)
+	if n != 0 {
+		t.Fatal("not read empty")
+		return
+	}
+	if err != io.EOF {
+		t.Fatal("not read empty")
+		return
+	}
 }

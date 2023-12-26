@@ -1,4 +1,4 @@
-package utils
+package zhash
 
 import (
 	"golang.org/x/crypto/bcrypt"

@@ -1,4 +1,4 @@
-package utils
+package assert
 
 func Assert(guard bool, fn func()) {
 	if !guard {

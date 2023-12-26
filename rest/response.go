@@ -1,4 +1,4 @@
-package utils
+package rest
 
 type Response struct {
 	Status int    `json:"status"`

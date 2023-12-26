@@ -1,7 +1,7 @@
 package crypto
 
 import (
-	. "gopkg.in/check.v1"
+	"testing"
 )
 
 var (
@@ -54,31 +54,40 @@ yZvADwuz/4aK0od0lX9c4Jp7Mo5vQ4TvdoBnPuGoyw==
 -----END RSA PRIVATE KEY-----`
 )
 
-func (s *CryptoSuite) TestContentEncryptCipherError(c *C) {
+func TestContentEncryptCipherError(t *testing.T) {
 	// crypto bucket
 	masterRsaCipher, _ := CreateMasterRsa(matDesc, rsaPublicKey, rsaPrivateKey)
 	contentProvider := CreateAesCtrCipher(masterRsaCipher, AES_TYPE_128)
 	cc, err := contentProvider.ContentCipher()
-	c.Assert(err, IsNil)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
 
 	var cipherData CipherData
 	cipherData.RandomKeyIv(31, 15)
 
 	_, err = cc.Clone(cipherData)
-	c.Assert(err, NotNil)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
 }
 
-func (s *CryptoSuite) TestCreateCipherDataError(c *C) {
+func TestCreateCipherDataError(t *testing.T) {
 	// crypto bucket
 	masterRsaCipher, _ := CreateMasterRsa(matDesc, "", "")
 	contentProvider := CreateAesCtrCipher(masterRsaCipher, AES_TYPE_128)
 
 	v := contentProvider.(aesCtrCipherBuilder)
 	_, err := v.createCipherData()
-	c.Assert(err, NotNil)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
 }
 
-func (s *CryptoSuite) TestContentCipherCDError(c *C) {
+func TestContentCipherCDError(t *testing.T) {
 	var cd CipherData
 
 	// crypto bucket
@@ -87,5 +96,8 @@ func (s *CryptoSuite) TestContentCipherCDError(c *C) {
 
 	v := contentProvider.(aesCtrCipherBuilder)
 	_, err := v.contentCipherCD(cd)
-	c.Assert(err, NotNil)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
 }

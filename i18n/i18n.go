@@ -1,4 +1,4 @@
-package utils
+package i18n
 
 import (
 	"container/list"
@@ -44,11 +44,11 @@ func InitI18n(i18nDir string) (I18n, error) {
 
 func HttpLanguage(req *http.Request) string {
 	lang := req.Header.Get(AcceptLang)
-	if len(lang) <= 0 {
-		lang = LangDefault
-	}
 	if strings.Index(lang, ",") > 0 {
 		lang = lang[:strings.Index(lang, ",")]
+	}
+	if len(lang) <= 0 {
+		lang = LangDefault
 	}
 	return lang
 }
@@ -67,22 +67,22 @@ func (i *defaultI18n) LangValue(lang, key, defaultVal string, params ...string) 
 
 	lkey := langKey(lang, key)
 	val, ok := i.i18nVals[lkey]
+	if !ok {
+		return defaultVal
+	}
 	paramsVal := make([]string, 0, len(params))
-	for _, v := range params {
-		pval, pok := i.i18nVals[lkey]
+	for _, param := range params {
+		pval, pok := i.i18nVals[param]
 		if pok {
 			paramsVal = append(paramsVal, langKey(lang, pval))
 		} else {
-			paramsVal = append(paramsVal, v)
+			paramsVal = append(paramsVal, param)
 		}
 	}
-	if ok {
-		if len(paramsVal) > 0 {
-			return fmt.Sprintf(val, paramsVal)
-		}
-		return val
+	if len(paramsVal) > 0 {
+		return fmt.Sprintf(val, paramsVal)
 	}
-	return defaultVal
+	return val
 }
 
 func (i *defaultI18n) Append(i18nDir string) error {
@@ -110,14 +110,13 @@ func loadI18n(i18nVals map[string]string, i18nDir string) error {
 			if er != nil {
 				return er
 			}
-			fiPath := fmt.Sprintf("%s/%s", i18nDir, info.Name())
+			fpath := filepath.Join(i18nDir, info.Name())
 			values := make(map[string]any)
-			err = zconf.Load(fiPath, &values)
+			err = zconf.Load(fpath, &values)
 			if err != nil {
 				return err
 			}
 			lang := strings.TrimSuffix(info.Name(), filepath.Ext(info.Name()))
-
 			l := list.New()
 			l.PushBack(Ele{key: lang, value: values})
 			for e := l.Front(); e != nil; e = e.Next() {

@@ -1,4 +1,4 @@
-package utils
+package browser
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ type CommondArg struct {
 	Args []string
 }
 
-func OpenBrowserWithURL(uri string) error {
+func OpenBrowserURL(uri string) error {
 	runArg, ok := commands[runtime.GOOS]
 	if !ok {
 		return fmt.Errorf("don't know how to open things on %s platform", runtime.GOOS)
