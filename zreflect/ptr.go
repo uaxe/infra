@@ -20,7 +20,7 @@ func Struct2MapOptionWithTag(tag string) Struct2MapOption {
 }
 
 func Struct2Map(x any, opts ...Struct2MapOption) (map[string]any, error) {
-	t, v := ReflectTypeAndValue(x)
+	t, v := TypeAndValue(x)
 	if v.Kind() != reflect.Struct {
 		return nil, errors.New("struct not found!")
 	}
@@ -56,8 +56,8 @@ func MergerStructIsZero() MergeStructOption {
 }
 
 func MergeSameStruct(x, y any, opts ...MergeStructOption) error {
-	xt, xv := ReflectTypeAndValue(x)
-	yt, yv := ReflectTypeAndValue(y)
+	xt, xv := TypeAndValue(x)
+	yt, yv := TypeAndValue(y)
 
 	if xv.NumField() != yv.NumField() {
 		return fmt.Errorf("not same num field %d,%d", xv.NumField(), yv.NumField())
@@ -84,22 +84,32 @@ func MergeSameStruct(x, y any, opts ...MergeStructOption) error {
 	return nil
 }
 
-func ReflectTypeAndValue(src any) (reflect.Type, reflect.Value) {
-	xt, xv := reflect.TypeOf(src), reflect.ValueOf(src)
-	switch xt.Kind() {
-	case reflect.Ptr:
-		xv, xt = xv.Elem(), xt.Elem()
-	default:
+func TypeAndValue(x any) (reflect.Type, reflect.Value) {
+	t, v := reflect.TypeOf(x), reflect.ValueOf(x)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+		v = v.Elem()
 	}
-	return xt, xv
+	return t, v
 }
 
-func StructWithTagSetValue(src, dst any, tag string) error {
-	xt, xv := ReflectTypeAndValue(src)
+func TypeAndKind(v any) (reflect.Type, reflect.Kind) {
+	t := reflect.TypeOf(v)
+	k := t.Kind()
+
+	if k == reflect.Ptr {
+		t = t.Elem()
+		k = t.Kind()
+	}
+	return t, k
+}
+
+func StructWithTag(src, dst any, tag string) error {
+	xt, xv := TypeAndValue(src)
 	if xv.Kind() != reflect.Struct {
 		return errors.New("src not struct")
 	}
-	yt, yv := ReflectTypeAndValue(dst)
+	yt, yv := TypeAndValue(dst)
 	if yv.Kind() != reflect.Struct {
 		return errors.New("dst not struct")
 	}
@@ -117,8 +127,8 @@ func StructWithTagSetValue(src, dst any, tag string) error {
 	return nil
 }
 
-func MapWithTagSetValue(src map[string]any, dst any, tag string) error {
-	yt, yv := ReflectTypeAndValue(dst)
+func MapBindStruct(src map[string]any, dst any, tag string) error {
+	yt, yv := TypeAndValue(dst)
 	if yv.Kind() != reflect.Struct {
 		return errors.New("dst not struct")
 	}

@@ -1,6 +1,8 @@
 package zreflect
 
-import "reflect"
+import (
+	"reflect"
+)
 
 func IsStructPtr(value any) bool {
 	return reflect.ValueOf(value).Kind() == reflect.Ptr &&
