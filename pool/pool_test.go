@@ -25,7 +25,7 @@ func TestGPool_Queue(t *testing.T) {
 		}
 	}()
 
-	wu, err := gpool.Queue(ctx, func(ctx context.Context) (i interface{}, e error) {
+	wu, err := gpool.Queue(ctx, func(ctx context.Context) (i any, e error) {
 		time.Sleep(5 * time.Second)
 		return "a", nil
 	})
@@ -75,14 +75,14 @@ func TestNewBatch(t *testing.T) {
 
 	timeoutCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	batch := gpool.NewBatch()
-	wus, err := batch.Queue(func(ctx context.Context) (interface{}, error) {
+	wus, err := batch.Queue(func(ctx context.Context) (any, error) {
 		time.Sleep(5 * time.Second)
 		return "a", nil
 	}).Queue(
-		func(ctx context.Context) (interface{}, error) {
+		func(ctx context.Context) (any, error) {
 			time.Sleep(5 * time.Second)
 			return "b", nil
-		}).Queue(func(ctx context.Context) (interface{}, error) {
+		}).Queue(func(ctx context.Context) (any, error) {
 		time.Sleep(5 * time.Second)
 		return "c", nil
 	}).Wait(timeoutCtx)
@@ -104,14 +104,14 @@ func TestNewBatch(t *testing.T) {
 	fmt.Println("FINISH...")
 
 	timeoutCtx, cancel = context.WithTimeout(ctx, 10*time.Second)
-	wus, err = batch.Queue(func(ctx context.Context) (interface{}, error) {
+	wus, err = batch.Queue(func(ctx context.Context) (any, error) {
 		time.Sleep(5 * time.Second)
 		return "a", nil
 	}).Queue(
-		func(ctx context.Context) (interface{}, error) {
+		func(ctx context.Context) (any, error) {
 			time.Sleep(5 * time.Second)
 			return "b", nil
-		}).Queue(func(ctx context.Context) (interface{}, error) {
+		}).Queue(func(ctx context.Context) (any, error) {
 		time.Sleep(5 * time.Second)
 		return "c", nil
 	}).Wait(timeoutCtx)
@@ -154,13 +154,13 @@ func TestGPool_Cancel(t *testing.T) {
 	batch := gpool.NewBatch()
 	timeoutCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	now := time.Now()
-	wus, err := batch.Queue(func(ctx context.Context) (interface{}, error) {
+	wus, err := batch.Queue(func(ctx context.Context) (any, error) {
 		return "a", nil
 	}).Queue(
-		func(ctx context.Context) (interface{}, error) {
+		func(ctx context.Context) (any, error) {
 			time.Sleep(5 * time.Second)
 			return "b", nil
-		}).Queue(func(ctx context.Context) (interface{}, error) {
+		}).Queue(func(ctx context.Context) (any, error) {
 		time.Sleep(5 * time.Second)
 		return "c", nil
 	}).Wait(timeoutCtx)

@@ -12,7 +12,7 @@ import (
 
 var tw = schedule.NewTimerWheel(100*time.Millisecond, 10)
 var c = NewLRUCache(context.TODO(), 10000, tw,
-	func(k, v interface{}) {
+	func(k, v any) {
 		fmt.Printf("OnEvnict %v %v\n", k, v)
 	})
 

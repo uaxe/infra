@@ -191,7 +191,7 @@ func (c *Command) IntFlag(name, description string, variable *int) *Command {
 	return c
 }
 
-func (c *Command) AddFlags(optionStruct interface{}) *Command {
+func (c *Command) AddFlags(optionStruct any) *Command {
 
 	t := reflect.TypeOf(optionStruct)
 

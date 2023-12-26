@@ -10,11 +10,11 @@ import (
 
 type Entry struct {
 	Timerid uint32
-	Value   interface{}
+	Value   any
 }
 
 type ChanMessage struct {
-	Key interface{} `json:"k"`
+	Key any `json:"k"`
 }
 
 type LRUCache struct {
@@ -29,13 +29,13 @@ func NewLRUCache(
 	ctx context.Context,
 	maxcapacity int,
 	expiredTw *schedule.TimerWheel,
-	OnEvicted func(k, v interface{})) *LRUCache {
+	OnEvicted func(k, v any)) *LRUCache {
 
 	c := New(maxcapacity)
-	c.OnEvicted = func(key Key, value interface{}) {
+	c.OnEvicted = func(key, value any) {
 		vv := value.(Entry)
 		if nil != OnEvicted {
-			OnEvicted(key.(interface{}), vv.Value)
+			OnEvicted(key.(any), vv.Value)
 		}
 		expiredTw.CancelTimer(vv.Timerid)
 	}
@@ -57,7 +57,7 @@ func (l *LRUCache) HitRate() (int, int) {
 	return int(currHit * 100 / currTotal), l.Length()
 }
 
-func (l *LRUCache) Get(key interface{}) (interface{}, bool) {
+func (l *LRUCache) Get(key any) (any, bool) {
 	atomic.AddUint64(&l.total, 1)
 	if v, ok := l.cache.Get(key); ok {
 		atomic.AddUint64(&l.hit, 1)
@@ -93,7 +93,7 @@ func (l *LRUCache) Put(key, v any, ttl time.Duration) chan time.Time {
 	return ttlChan
 }
 
-func (l *LRUCache) Remove(key interface{}) interface{} {
+func (l *LRUCache) Remove(key any) any {
 	vv := l.cache.Remove(key)
 	if vv != nil {
 		e := vv.(Entry)
@@ -106,7 +106,7 @@ func (l *LRUCache) Remove(key interface{}) interface{} {
 	return nil
 }
 
-func (l *LRUCache) Contains(key interface{}) bool {
+func (l *LRUCache) Contains(key any) bool {
 	if _, ok := l.cache.Get(key); ok {
 		return ok
 	}
@@ -117,8 +117,8 @@ func (l *LRUCache) Length() int {
 	return l.cache.Len()
 }
 
-func (l *LRUCache) Iterator(do func(k, v interface{}) error) {
-	l.cache.Iterator(func(k, v interface{}) error {
+func (l *LRUCache) Iterator(do func(k, v any) error) {
+	l.cache.Iterator(func(k, v any) error {
 		vv := v.(Entry)
 		return do(k, vv.Value)
 	})

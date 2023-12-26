@@ -34,22 +34,19 @@ type cache struct {
 
 	// OnEvicted optionally specificies a callback function to be
 	// executed when an entry is purged from the c.
-	OnEvicted func(key Key, value interface{})
+	OnEvicted func(key, value any)
 
 	ll    *list.List
-	cache map[interface{}]*list.Element
+	cache map[any]*list.Element
 
-	evictedCache *sync.Map // 业务处理集合
+	evictedCache *sync.Map
 
-	evictedRate int // 指定业务处理的并发数量
+	evictedRate int
 }
 
-// A Key may be any value that is comparable. See http://golang.org/ref/spec#Comparison_operators
-type Key interface{}
-
 type entry struct {
-	key   Key
-	value interface{}
+	key   any
+	value any
 }
 
 type Option func(c *cache)
@@ -67,7 +64,7 @@ func New(maxEntries int, opts ...Option) *cache {
 	c := &cache{
 		MaxEntries:   maxEntries,
 		ll:           list.New(),
-		cache:        make(map[interface{}]*list.Element),
+		cache:        make(map[any]*list.Element),
 		evictedCache: &sync.Map{},
 		evictedRate:  maxEntries / 1000,
 	}
@@ -83,9 +80,9 @@ func New(maxEntries int, opts ...Option) *cache {
 
 func (c *cache) evicted() {
 	go func() {
-		limiter := make(chan interface{}, c.evictedRate)
+		limiter := make(chan any, c.evictedRate)
 		for {
-			c.evictedCache.Range(func(key, value interface{}) bool {
+			c.evictedCache.Range(func(key, value any) bool {
 				limiter <- nil
 				go func() {
 					defer func() {
@@ -107,13 +104,13 @@ func (c *cache) evicted() {
 }
 
 // Add adds a value to the c.
-func (c *cache) Add(key Key, value interface{}) {
+func (c *cache) Add(key, value any) {
 
 	c.Lock()
 	defer c.Unlock()
 
 	if c.cache == nil {
-		c.cache = make(map[interface{}]*list.Element)
+		c.cache = make(map[any]*list.Element)
 		c.ll = list.New()
 	}
 	if ee, ok := c.cache[key]; ok {
@@ -129,7 +126,7 @@ func (c *cache) Add(key Key, value interface{}) {
 }
 
 // Get looks up a key's value from the c.
-func (c *cache) Get(key Key) (value interface{}, ok bool) {
+func (c *cache) Get(key any) (value any, ok bool) {
 
 	c.Lock()
 	defer c.Unlock()
@@ -145,7 +142,7 @@ func (c *cache) Get(key Key) (value interface{}, ok bool) {
 }
 
 // Remove removes the provided key from the c.
-func (c *cache) Remove(key Key) interface{} {
+func (c *cache) Remove(key any) any {
 
 	c.Lock()
 	defer c.Unlock()
@@ -160,7 +157,7 @@ func (c *cache) Remove(key Key) interface{} {
 }
 
 // RemoveOldest removes the oldest item from the c.
-func (c *cache) removeOldest() interface{} {
+func (c *cache) removeOldest() any {
 
 	if c.cache == nil {
 		return nil
@@ -173,7 +170,7 @@ func (c *cache) removeOldest() interface{} {
 	return nil
 }
 
-func (c *cache) removeElement(e *list.Element) interface{} {
+func (c *cache) removeElement(e *list.Element) any {
 	c.ll.Remove(e)
 	kv := e.Value.(*entry)
 	delete(c.cache, kv.key)
@@ -210,8 +207,8 @@ func (c *cache) Clear() {
 	c.cache = nil
 }
 
-//iterator
-func (c *cache) Iterator(do func(k, v interface{}) error) {
+// iterator
+func (c *cache) Iterator(do func(k, v any) error) {
 	c.RLock()
 	defer c.RUnlock()
 	for _, e := range c.cache {

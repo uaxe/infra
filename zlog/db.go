@@ -25,21 +25,21 @@ func (db *dbLog) LogMode(level logger.LogLevel) logger.Interface {
 	return db
 }
 
-func (db *dbLog) Info(ctx context.Context, msg string, data ...interface{}) {
+func (db *dbLog) Info(ctx context.Context, msg string, data ...any) {
 	if db.LogLevel < logger.Info {
 		return
 	}
 	db.Log.Info("db info:", zap.Any("data", data))
 }
 
-func (db *dbLog) Warn(ctx context.Context, msg string, data ...interface{}) {
+func (db *dbLog) Warn(ctx context.Context, msg string, data ...any) {
 	if db.LogLevel < logger.Warn {
 		return
 	}
 	db.Log.Warn("db warn:"+msg, zap.Any("data", data))
 }
 
-func (db *dbLog) Error(ctx context.Context, msg string, data ...interface{}) {
+func (db *dbLog) Error(ctx context.Context, msg string, data ...any) {
 	if db.LogLevel < logger.Error {
 		return
 	}

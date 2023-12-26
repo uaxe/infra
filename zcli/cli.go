@@ -114,7 +114,7 @@ func (c *Cli) IntFlag(name, description string, variable *int) *Cli {
 	return c
 }
 
-func (c *Cli) AddFlags(flags interface{}) *Cli {
+func (c *Cli) AddFlags(flags any) *Cli {
 	c.rootCommand.AddFlags(flags)
 	return c
 }
@@ -133,7 +133,7 @@ func (c *Cli) OtherArgs() []string {
 	return c.rootCommand.flags.Args()
 }
 
-func (c *Cli) NewSubCommandFunction(name string, description string, test interface{}) *Cli {
+func (c *Cli) NewSubCommandFunction(name string, description string, test any) *Cli {
 	c.rootCommand.NewSubCommandFunction(name, description, test)
 	return c
 }

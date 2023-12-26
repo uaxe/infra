@@ -9,11 +9,11 @@ func IsStructPtr(value any) bool {
 		reflect.ValueOf(value).Elem().Kind() == reflect.Struct
 }
 
-func IsFunction(value interface{}) bool {
+func IsFunction(value any) bool {
 	return reflect.ValueOf(value).Kind() == reflect.Func
 }
 
-func IsStruct(value interface{}) bool {
+func IsStruct(value any) bool {
 	return reflect.ValueOf(value).Kind() == reflect.Struct
 }
 
