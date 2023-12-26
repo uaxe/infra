@@ -303,7 +303,7 @@ func (c *Command) NewSubCommandFunction(name string, description string, fn any)
 	}
 	result.Action(func() error {
 		ret := fnValue.Call([]reflect.Value{flags})[0].Interface()
-		if result != nil {
+		if ret != nil {
 			return ret.(error)
 		}
 		return nil

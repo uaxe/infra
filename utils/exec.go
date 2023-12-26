@@ -3,48 +3,28 @@ package utils
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
-func ExecCmd(ctx context.Context, name string, args ...string) ([]byte, error) {
+func ExecCmd(ctx context.Context, name string, args ...string) ([]byte, []byte, error) {
 	cmd := exec.CommandContext(ctx, name, args...)
-	var outputBuf, stderrBuf bytes.Buffer
-	cmd.Stdout = &outputBuf
-	cmd.Stderr = &stderrBuf
-	err := cmd.Start()
-	if err != nil {
-		return nil, fmt.Errorf("start fail %s %s %s %+v", err, cmd.Env, name, args)
-	}
-	done := make(chan error, 1)
-	go func() {
-		done <- cmd.Wait()
-	}()
-	select {
-	case <-ctx.Done():
-		return stderrBuf.Bytes(), fmt.Errorf("kill deadline: %s %s %s",
-			name, strings.Join(args, " "), stderrBuf.Bytes())
-	case e := <-done:
-		if e != nil {
-			return stderrBuf.Bytes(), fmt.Errorf("kill wait: %s %s %s %s",
-				name, strings.Join(args, " "), e.Error(), stderrBuf.Bytes())
-		}
-	}
-	return outputBuf.Bytes(), nil
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	return stdout.Bytes(), stderr.Bytes(), err
 }
 
-func WriteFileToDir(dir string, r io.Reader, fname string) (string, error) {
+func WriteFileToDir(dir, fname string, r io.Reader) (string, error) {
 	if _, err := os.Lstat(dir); nil != err {
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			return "", fmt.Errorf("mkdir  fail %v", err)
+			return "", err
 		}
 	}
-
 	filePath := filepath.Join(dir, fname)
 	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if nil != err {
@@ -61,23 +41,11 @@ func WriteFileToDir(dir string, r io.Reader, fname string) (string, error) {
 }
 
 func MkdirAll(dir string) error {
-	if _, err := os.Lstat(dir); nil != err {
+	if _, err := os.Lstat(dir); err != nil {
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("mkdir all fail %v", err)
+			return err
 		}
 	}
 	return nil
-}
-
-func WriteTempFile(tempFilePrefix string, r io.Reader) (*os.File, error) {
-	file, err := os.CreateTemp(os.TempDir(), tempFilePrefix)
-	if nil != err {
-		return nil, err
-	}
-	_, err = io.Copy(file, r)
-	if err != nil {
-		return nil, err
-	}
-	return file, nil
 }
