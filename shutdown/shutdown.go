@@ -8,15 +8,11 @@ import (
 
 var _ Hook = (*hook)(nil)
 
-// Hook a graceful shutdown hook, default with signals of SIGINT and SIGTERM
 type Hook interface {
-	// WithSignals add more signals into hook
 	WithSignals(signals ...syscall.Signal)
 
-	// ADD register shutdown handles
 	Add(func())
 
-	// WatchSignal with signal
 	WatchSignal()
 }
 
@@ -25,14 +21,9 @@ type hook struct {
 	handlers []func()
 }
 
-// NewHook create a Hook instance
 func NewHook() Hook {
-	h := &hook{
-		signal: make(chan os.Signal, 1),
-	}
-	h.Add(func() {
-		signal.Stop(h.signal)
-	})
+	h := &hook{signal: make(chan os.Signal, 1)}
+	h.Add(func() { signal.Stop(h.signal) })
 	h.WithSignals(syscall.SIGINT, syscall.SIGTERM)
 	return h
 }
