@@ -24,11 +24,10 @@ func IsPortAvailable(port int) bool {
 	return true
 }
 
-func GetDefaultAvailablePort(defaultPort int) int {
-	listener, err := net.Listen("tcp", ":0")
+func GetAvailablePortOrDefault(defaultPort int) int {
+	port, err := GetAvailablePort()
 	if err != nil {
 		return defaultPort
 	}
-	defer listener.Close()
-	return listener.Addr().(*net.TCPAddr).Port
+	return port
 }
