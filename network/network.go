@@ -23,3 +23,12 @@ func IsPortAvailable(port int) bool {
 	defer listener.Close()
 	return true
 }
+
+func GetDefaultAvailablePort(defaultPort int) int {
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return defaultPort
+	}
+	defer listener.Close()
+	return listener.Addr().(*net.TCPAddr).Port
+}
