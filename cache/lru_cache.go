@@ -34,7 +34,7 @@ func NewLRUCache(
 	c := New(maxcapacity)
 	c.OnEvicted = func(key, value any) {
 		vv := value.(Entry)
-		if nil != OnEvicted {
+		if OnEvicted != nil {
 			OnEvicted(key.(any), vv.Value)
 		}
 		expiredTw.CancelTimer(vv.Timerid)
@@ -74,7 +74,7 @@ func (l *LRUCache) Put(key, v any, ttl time.Duration) chan time.Time {
 	vv := Entry{Value: v}
 	var ttlChan chan time.Time
 	if ttl > 0 {
-		if nil != l.tw {
+		if l.tw != nil {
 			if val, ok := l.cache.Get(key); ok {
 				if exist, ok := val.(Entry); ok {
 					l.tw.CancelTimer(exist.Timerid)
@@ -97,7 +97,7 @@ func (l *LRUCache) Remove(key any) any {
 	vv := l.cache.Remove(key)
 	if vv != nil {
 		e := vv.(Entry)
-		if nil != l.tw {
+		if l.tw != nil {
 			l.tw.CancelTimer(e.Timerid)
 		}
 		return e.Value

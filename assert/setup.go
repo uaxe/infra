@@ -1,15 +1,20 @@
 package assert
 
-func Setup(fn func(err error), errs ...error) {
-	for _, e := range errs {
-		AssertE(e, fn)
+func Setup(assert func(err error), funcs ...any) {
+	if assert == nil {
+		return
+	}
+	if e := FindE(funcs...); e != nil {
+		assert(e)
 	}
 }
 
-func SetupPanic(errs ...error) {
-	for _, e := range errs {
-		AssertE(e, func(e error) {
-			panic(e)
-		})
+func PanicE(errs ...any) {
+	Setup(Panic, errs...)
+}
+
+func Panic(err error) {
+	if err != nil {
+		panic(err)
 	}
 }

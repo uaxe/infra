@@ -84,26 +84,6 @@ func MergeSameStruct(x, y any, opts ...MergeStructOption) error {
 	return nil
 }
 
-func TypeAndValue(x any) (reflect.Type, reflect.Value) {
-	t, v := reflect.TypeOf(x), reflect.ValueOf(x)
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-		v = v.Elem()
-	}
-	return t, v
-}
-
-func TypeAndKind(v any) (reflect.Type, reflect.Kind) {
-	t := reflect.TypeOf(v)
-	k := t.Kind()
-
-	if k == reflect.Ptr {
-		t = t.Elem()
-		k = t.Kind()
-	}
-	return t, k
-}
-
 func StructWithTag(src, dst any, tag string) error {
 	xt, xv := TypeAndValue(src)
 	if xv.Kind() != reflect.Struct {
