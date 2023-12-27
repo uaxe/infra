@@ -1,11 +1,11 @@
-package network
+package znet
 
 import (
 	"fmt"
 	"net"
 )
 
-func GetAvailablePort() (int, error) {
+func AvailablePort() (int, error) {
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
 		return 0, err
@@ -15,7 +15,7 @@ func GetAvailablePort() (int, error) {
 }
 
 func IsPortAvailable(port int) bool {
-	address := fmt.Sprintf("%s:%d", "0.0.0.0", port)
+	address := fmt.Sprintf(":%d", port)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return false
@@ -24,10 +24,10 @@ func IsPortAvailable(port int) bool {
 	return true
 }
 
-func GetAvailablePortOrDefault(defaultPort int) int {
-	port, err := GetAvailablePort()
-	if err != nil {
+func DefaultOrAvailablePort(defaultPort int) int {
+	if IsPortAvailable(defaultPort) {
 		return defaultPort
 	}
+	port, _ := AvailablePort()
 	return port
 }
