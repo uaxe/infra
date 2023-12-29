@@ -94,7 +94,6 @@ func (c *Cli) NewSubCommandInheritFlags(name, description string) *Command {
 	return c.rootCommand.NewSubCommandInheritFlags(name, description)
 }
 
-// PreRun - Calls the given function before running the specific command.
 func (c *Cli) PreRun(callback func(*Cli) error) {
 	c.preRunCommand = callback
 }
@@ -136,4 +135,9 @@ func (c *Cli) OtherArgs() []string {
 func (c *Cli) NewSubCommandFunction(name string, description string, test any) *Cli {
 	c.rootCommand.NewSubCommandFunction(name, description, test)
 	return c
+}
+
+func (c *Cli) CommandExists(name string) (*Command, bool) {
+	result, exists := c.rootCommand.CommandExists(name)
+	return result, exists
 }

@@ -101,7 +101,6 @@ func (c *Command) PrintHelp() {
 		c.flags.SetOutput(os.Stdout)
 		c.flags.PrintDefaults()
 		c.flags.SetOutput(os.Stderr)
-
 	}
 	fmt.Println()
 }
@@ -134,9 +133,7 @@ func (c *Command) run(args []string) error {
 	}
 
 	if c.app.defaultCommand != nil {
-		// Prevent recursion!
 		if c.app.defaultCommand != c {
-			// only run default command if no args passed
 			if len(args) == 0 {
 				return c.app.defaultCommand.run(args)
 			}
@@ -310,4 +307,9 @@ func (c *Command) NewSubCommandFunction(name string, description string, fn any)
 	})
 	result.AddFlags(flags.Interface())
 	return result
+}
+
+func (c *Command) CommandExists(name string) (*Command, bool) {
+	result, exists := c.subCommandsMap[name]
+	return result, exists
 }
