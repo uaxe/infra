@@ -1,30 +1,25 @@
 package browser
 
 import (
-	"fmt"
 	"os/exec"
 	"runtime"
 )
 
-var (
-	commands = map[string]CommondArg{
-		"windows": {"cmd", []string{"/c", "start"}},
-		"darwin":  {"open", []string{}},
-		"linux":   {"xdg-open", []string{}},
-	}
-)
+func Open(url string) error {
+	var (
+		cmd  string
+		args []string
+	)
 
-type CommondArg struct {
-	Cmd  string
-	Args []string
-}
-
-func OpenBrowserURL(uri string) error {
-	runArg, ok := commands[runtime.GOOS]
-	if !ok {
-		return fmt.Errorf("don't know how to open things on %s platform", runtime.GOOS)
+	switch runtime.GOOS {
+	case "windows":
+		cmd, args = "cmd", []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default:
+		// "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
 	}
-	runArg.Args = append(runArg.Args, uri)
-	cmd := exec.Command(runArg.Cmd, runArg.Args...)
-	return cmd.Start()
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
 }
