@@ -7,6 +7,11 @@ type (
 	}
 )
 
-func Bindings(bs ...Binder) {
-
+func Bindings(src, dst any, bs ...Binder) error {
+	for _, bind := range bs {
+		if err := bind.Binding(src, dst); err != nil {
+			return err
+		}
+	}
+	return nil
 }

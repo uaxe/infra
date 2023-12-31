@@ -22,9 +22,9 @@ func (h *header) Name() string {
 func (h *header) Binding(src any, dst any) error {
 	switch x := src.(type) {
 	case http.Header:
-		return zreflect.MapWithTagSetValue(HttpHeaderMap(x), dst, h.Name())
+		return zreflect.MapBindStruct(HttpHeaderMap(x), dst, h.Name())
 	case map[string]any:
-		return zreflect.MapWithTagSetValue(x, dst, h.Name())
+		return zreflect.MapBindStruct(x, dst, h.Name())
 	default:
 		return errors.New(`src not  http header`)
 	}
