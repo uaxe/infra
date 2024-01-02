@@ -7,19 +7,18 @@ import (
 	"time"
 )
 
-var Zap = new(_zap)
-
-type _zap struct {
+type Zap struct {
 	prefix, format, stacktraceKey, encodeLevel string
 	level                                      zapcore.Level
 	encoder                                    zapcore.LevelEncoder
+	writer                                     zapcore.WriteSyncer
 	writeSyncer                                func(level string) (zapcore.WriteSyncer, error)
 }
 
 func NewZap(prefix, format, stacktraceKey string,
 	level zapcore.Level, encoder zapcore.LevelEncoder,
-	writeSyncer func(level string) (zapcore.WriteSyncer, error)) *_zap {
-	z := &_zap{
+	writeSyncer func(level string) (zapcore.WriteSyncer, error)) *Zap {
+	z := &Zap{
 		prefix:        prefix,
 		format:        format,
 		stacktraceKey: stacktraceKey,
@@ -30,14 +29,14 @@ func NewZap(prefix, format, stacktraceKey string,
 	return z
 }
 
-func (z *_zap) GetEncoder() zapcore.Encoder {
+func (z *Zap) GetEncoder() zapcore.Encoder {
 	if z.format == "json" {
 		return zapcore.NewJSONEncoder(z.GetEncoderConfig())
 	}
 	return zapcore.NewConsoleEncoder(z.GetEncoderConfig())
 }
 
-func (z *_zap) GetEncoderConfig() zapcore.EncoderConfig {
+func (z *Zap) GetEncoderConfig() zapcore.EncoderConfig {
 	return zapcore.EncoderConfig{
 		MessageKey:     "message",
 		LevelKey:       "level",
@@ -53,20 +52,21 @@ func (z *_zap) GetEncoderConfig() zapcore.EncoderConfig {
 	}
 }
 
-func (z *_zap) GetEncoderCore(l zapcore.Level, level zap.LevelEnablerFunc) zapcore.Core {
+func (z *Zap) GetEncoderCore(l zapcore.Level, level zap.LevelEnablerFunc) zapcore.Core {
 	writer, err := z.writeSyncer(l.String())
 	if err != nil {
 		fmt.Printf("Get Write Syncer Failed err:%v", err.Error())
 		return nil
 	}
+	z.writer = writer
 	return zapcore.NewCore(z.GetEncoder(), writer, level)
 }
 
-func (z *_zap) CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+func (z *Zap) CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
 	encoder.AppendString(z.prefix + " " + t.Format("2006/01/02 - 15:04:05.000"))
 }
 
-func (z *_zap) GetZapCores() []zapcore.Core {
+func (z *Zap) GetZapCores() []zapcore.Core {
 	cores := make([]zapcore.Core, 0, 7)
 	for level := z.level; level <= zapcore.FatalLevel; level++ {
 		cores = append(cores, z.GetEncoderCore(level, z.GetLevelPriority(level)))
@@ -74,7 +74,7 @@ func (z *_zap) GetZapCores() []zapcore.Core {
 	return cores
 }
 
-func (z *_zap) GetLevelPriority(level zapcore.Level) zap.LevelEnablerFunc {
+func (z *Zap) GetLevelPriority(level zapcore.Level) zap.LevelEnablerFunc {
 	switch level {
 	case zapcore.DebugLevel:
 		return func(level zapcore.Level) bool { // 调试级别
@@ -109,4 +109,8 @@ func (z *_zap) GetLevelPriority(level zapcore.Level) zap.LevelEnablerFunc {
 			return level == zap.DebugLevel
 		}
 	}
+}
+
+func (z *Zap) GetWriter() zapcore.WriteSyncer {
+	return z.writer
 }

@@ -25,6 +25,22 @@ func Zap(directory, prefix, format, stacktraceKey, level,
 	return logger, nil
 }
 
+func ZapAndWriter(directory, prefix, format, stacktraceKey, level,
+	encoderLevel string, showLine bool, opts ...zapx.OptionFunc) (*zap.Logger, zapcore.WriteSyncer, error) {
+	fileRotate, err := zapx.NewFileRotateLogs(directory, opts...)
+	if err != nil {
+		return nil, nil, err
+	}
+	z := zapx.NewZap(prefix, format, stacktraceKey, ZapLevel(level),
+		ZapEncoderLevel(encoderLevel), fileRotate.GetWriteSyncer)
+	cores := z.GetZapCores()
+	logger := zap.New(zapcore.NewTee(cores...))
+	if showLine {
+		logger = logger.WithOptions(zap.AddCaller())
+	}
+	return logger, z.GetWriter(), nil
+}
+
 func ZapEncoderLevel(encoderLevel string) zapcore.LevelEncoder {
 	switch encoderLevel {
 	case "LowercaseLevelEncoder":
