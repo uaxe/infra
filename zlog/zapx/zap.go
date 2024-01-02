@@ -108,12 +108,3 @@ func (z *Zap) GetLevelPriority(level zapcore.Level) zap.LevelEnablerFunc {
 		}
 	}
 }
-
-func (z *Zap) GetWriteSyncer(l zapcore.Level) (zapcore.WriteSyncer, error) {
-	writer, err := z.writeSyncer(l.String())
-	if err != nil {
-		fmt.Printf("Get Write Syncer Failed err:%v", err.Error())
-		return nil, err
-	}
-	return writer, nil
-}
