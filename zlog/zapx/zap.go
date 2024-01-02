@@ -11,7 +11,6 @@ type Zap struct {
 	prefix, format, stacktraceKey, encodeLevel string
 	level                                      zapcore.Level
 	encoder                                    zapcore.LevelEncoder
-	writer                                     zapcore.WriteSyncer
 	writeSyncer                                func(level string) (zapcore.WriteSyncer, error)
 }
 
@@ -58,7 +57,6 @@ func (z *Zap) GetEncoderCore(l zapcore.Level, level zap.LevelEnablerFunc) zapcor
 		fmt.Printf("Get Write Syncer Failed err:%v", err.Error())
 		return nil
 	}
-	z.writer = writer
 	return zapcore.NewCore(z.GetEncoder(), writer, level)
 }
 
@@ -67,7 +65,7 @@ func (z *Zap) CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncod
 }
 
 func (z *Zap) GetZapCores() []zapcore.Core {
-	cores := make([]zapcore.Core, 0, 7)
+	cores := make([]zapcore.Core, 0, zapcore.FatalLevel)
 	for level := z.level; level <= zapcore.FatalLevel; level++ {
 		cores = append(cores, z.GetEncoderCore(level, z.GetLevelPriority(level)))
 	}
@@ -111,6 +109,11 @@ func (z *Zap) GetLevelPriority(level zapcore.Level) zap.LevelEnablerFunc {
 	}
 }
 
-func (z *Zap) GetWriter() zapcore.WriteSyncer {
-	return z.writer
+func (z *Zap) GetWriteSyncer(l zapcore.Level) (zapcore.WriteSyncer, error) {
+	writer, err := z.writeSyncer(l.String())
+	if err != nil {
+		fmt.Printf("Get Write Syncer Failed err:%v", err.Error())
+		return nil, err
+	}
+	return writer, nil
 }
