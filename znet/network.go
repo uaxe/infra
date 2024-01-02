@@ -24,10 +24,20 @@ func IsPortAvailable(port int) bool {
 	return true
 }
 
-func DefaultOrAvailablePort(defaultPort int) int {
-	if IsPortAvailable(defaultPort) {
-		return defaultPort
+func DefaultOrAvailablePort(port int) (int, error) {
+	if !IsPortAvailable(port) {
+		return AvailablePort()
 	}
-	port, _ := AvailablePort()
+	return port, nil
+}
+
+func DefaultOrAvailablePortWithFunc(port int, fn func(err error)) int {
+	if IsPortAvailable(port) {
+		return port
+	}
+	port, err := AvailablePort()
+	if err != nil {
+		fn(err)
+	}
 	return port
 }
