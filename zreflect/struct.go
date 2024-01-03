@@ -47,41 +47,16 @@ func Struct2Map(x any, opts ...Struct2MapOption) (map[string]any, error) {
 type MergeStructOption func(xf, yf reflect.StructField, xv, yv reflect.Value) error
 
 func MergerStructIsZero() MergeStructOption {
-	return func(xt, yt reflect.StructField, xv, yv reflect.Value) error {
-		if xv.FieldByName(xt.Name).IsZero() && !yv.FieldByName(xt.Name).IsZero() {
-			xv.FieldByName(xt.Name).Set(yv.FieldByName(yt.Name))
+	return func(x, y reflect.StructField, xv, yv reflect.Value) error {
+		val1, val2 := xv.FieldByName(x.Name), yv.FieldByName(y.Name)
+		if !val1.IsZero() && val2.IsZero() {
+			if !val2.CanAddr() {
+				return fmt.Errorf("dst field [%s] not can addr", y.Name)
+			}
+			val2.Set(val1)
 		}
 		return nil
 	}
-}
-
-func MergeSameStruct(x, y any, opts ...MergeStructOption) error {
-	xt, xv := TypeAndValue(x)
-	yt, yv := TypeAndValue(y)
-
-	if xv.NumField() != yv.NumField() {
-		return fmt.Errorf("not same num field %d,%d", xv.NumField(), yv.NumField())
-	}
-
-	if len(opts) == 0 {
-		opts = append(opts, MergerStructIsZero())
-	}
-
-	for i := 0; i < xv.NumField(); i++ {
-		if !xv.Field(i).CanInterface() || !yv.Field(i).CanInterface() {
-			continue
-		}
-		if !strings.EqualFold(xt.Field(i).Name, yt.Field(i).Name) {
-			return fmt.Errorf("name diff %s,%s", xt.Field(i).Name, yt.Field(i).Name)
-		}
-		for _, opt := range opts {
-			if err := opt(xt.Field(i), yt.Field(i), xv, yv); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 func StructWithTag(src, dst any, tag string) error {
@@ -122,5 +97,30 @@ func MapBindStruct(src map[string]any, dst any, tag string) error {
 			}
 		}
 	}
+	return nil
+}
+
+func MergeStruct(src, dst any, opts ...MergeStructOption) error {
+	xt, xv := TypeAndValue(src)
+	yt, yv := TypeAndValue(dst)
+
+	if len(opts) == 0 {
+		opts = append(opts, MergerStructIsZero())
+	}
+	xlen, ylen := xv.NumField(), yv.NumField()
+	for i := 0; i < xlen; i++ {
+		if i > ylen || !xv.Field(i).CanInterface() || !yv.Field(i).CanInterface() {
+			continue
+		}
+		if !strings.EqualFold(xt.Field(i).Name, yt.Field(i).Name) {
+			return fmt.Errorf("name diff %s,%s", xt.Field(i).Name, yt.Field(i).Name)
+		}
+		for _, opt := range opts {
+			if err := opt(xt.Field(i), yt.Field(i), xv, yv); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
