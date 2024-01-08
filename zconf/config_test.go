@@ -21,7 +21,7 @@ type Config struct {
 }
 
 func TestLoad(t *testing.T) {
-	filepath.Walk("./testdata", func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk("./testdata", func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
@@ -35,4 +35,7 @@ func TestLoad(t *testing.T) {
 		}
 		return nil
 	})
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
 }

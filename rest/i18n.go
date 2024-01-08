@@ -1,4 +1,4 @@
-package i18n
+package rest
 
 import (
 	"container/list"
@@ -105,29 +105,30 @@ func loadI18n(i18nVals map[string]string, i18nDir string) error {
 		if err != nil {
 			return err
 		}
-		if !d.IsDir() {
-			info, er := d.Info()
-			if er != nil {
-				return er
-			}
-			fpath := filepath.Join(i18nDir, info.Name())
-			values := make(map[string]any)
-			err = zconf.Load(fpath, &values)
-			if err != nil {
-				return err
-			}
-			lang := strings.TrimSuffix(info.Name(), filepath.Ext(info.Name()))
-			l := list.New()
-			l.PushBack(Ele{key: lang, value: values})
-			for e := l.Front(); e != nil; e = e.Next() {
-				ele := e.Value.(Ele)
-				switch ele.value.(type) {
-				case string:
-					i18nVals[ele.key] = ele.value.(string)
-				case map[string]any:
-					for k, v := range ele.value.(map[string]any) {
-						l.PushBack(Ele{key: langKey(ele.key, k), value: v})
-					}
+		if d.IsDir() {
+			return nil
+		}
+
+		info, er := d.Info()
+		if er != nil {
+			return er
+		}
+		fpath := filepath.Join(i18nDir, info.Name())
+		var values map[string]any
+		if err = zconf.Load(fpath, &values); err != nil {
+			return err
+		}
+		lang := strings.TrimSuffix(info.Name(), filepath.Ext(info.Name()))
+		l := list.New()
+		l.PushBack(Ele{key: lang, value: values})
+		for e := l.Front(); e != nil; e = e.Next() {
+			ele := e.Value.(Ele)
+			switch ele.value.(type) {
+			case string:
+				i18nVals[ele.key] = ele.value.(string)
+			case map[string]any:
+				for k, v := range ele.value.(map[string]any) {
+					l.PushBack(Ele{key: langKey(ele.key, k), value: v})
 				}
 			}
 		}

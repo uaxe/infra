@@ -11,7 +11,7 @@ import (
 type WorkUnit struct {
 	ctx   context.Context
 	once  sync.Once
-	ch    chan *any //future
+	ch    chan *any
 	work  WorkFunc
 	Value any
 	Err   error

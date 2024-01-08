@@ -19,8 +19,8 @@ func TestGPool_Queue(t *testing.T) {
 			default:
 
 			}
-			size, cap := gpool.Monitor()
-			fmt.Printf("Monitor:%d/%d\n", size, cap)
+			qsize, qcap := gpool.Monitor()
+			fmt.Printf("Monitor:%d/%d\n", qsize, qcap)
 			time.Sleep(1 * time.Second)
 		}
 	}()
@@ -67,8 +67,8 @@ func TestNewBatch(t *testing.T) {
 			default:
 
 			}
-			size, cap := gpool.Monitor()
-			fmt.Printf("Monitor:%d/%d\n", size, cap)
+			qsize, qcap := gpool.Monitor()
+			fmt.Printf("Monitor:%d/%d\n", qsize, qcap)
 			time.Sleep(1 * time.Second)
 		}
 	}()
@@ -145,8 +145,8 @@ func TestGPool_Cancel(t *testing.T) {
 			default:
 
 			}
-			size, cap := gpool.Monitor()
-			fmt.Printf("Monitor:%d/%d\n", size, cap)
+			qsize, qcap := gpool.Monitor()
+			fmt.Printf("Monitor:%d/%d\n", qsize, qcap)
 			time.Sleep(1 * time.Second)
 		}
 	}()

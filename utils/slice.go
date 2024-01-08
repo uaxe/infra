@@ -18,10 +18,9 @@ func SliceDistinct[M ~[]V, V any](m M, fn func(V) any) []V {
 		key := fn(v)
 		if _, ok := ms[key]; ok {
 			continue
-		} else {
-			ms[key] = v
-			keys = append(keys, key)
 		}
+		ms[key] = v
+		keys = append(keys, key)
 	}
 	mv := make([]V, 0, len(ms))
 	for i := range keys {
@@ -49,7 +48,7 @@ func SliceRange[M ~[]V, V any](m M, f func(V) bool) {
 	return
 }
 
-func Slice2Map[M ~[]V, V comparable](m M) map[V]struct{} {
+func SliceToMap[M ~[]V, V comparable](m M) map[V]struct{} {
 	ms := make(map[V]struct{}, len(m))
 	for _, v := range m {
 		ms[v] = struct{}{}

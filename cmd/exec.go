@@ -30,7 +30,9 @@ func WriteFileToDir(dir, fname string, r io.Reader) (string, error) {
 	if nil != err {
 		return "", err
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 
 	_, err = io.Copy(f, r)
 	if err != nil {
