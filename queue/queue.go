@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	IFace interface {
+	IQueue interface {
 		Start() error
 		Push(ctx context.Context, hashid string, raw []byte) (bool, error)
 		Publish(ctx context.Context, hashid string, raw []byte)
@@ -13,10 +13,12 @@ type (
 		Close(hashid string) error
 	}
 
-	QWorker func(channelid string, raw []byte) error
-)
+	QueueMeta struct {
+		Ctx             context.Context
+		QueueNamePrefix string
+		HashSize        int
+		TopicMode       bool
+	}
 
-const (
-	QueuePrefix = "_%s:%s:queue_"
-	TopicPrefix = "_%s:%s:topic_"
+	QWorker func(channelid string, raw []byte) error
 )

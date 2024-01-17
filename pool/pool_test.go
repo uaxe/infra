@@ -1,4 +1,4 @@
-package pool
+package pool_test
 
 import (
 	"context"
@@ -6,11 +6,13 @@ import (
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/uaxe/infra/pool"
 )
 
 func TestGPool_Queue(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	gpool := NewLimitPool(ctx, 100)
+	gpool := pool.NewLimitPool(ctx, 100)
 	go func() {
 		for {
 			select {
@@ -58,7 +60,7 @@ func TestGPool_Queue(t *testing.T) {
 
 func TestNewBatch(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	gpool := NewLimitPool(ctx, 100)
+	gpool := pool.NewLimitPool(ctx, 100)
 	go func() {
 		for {
 			select {
@@ -136,7 +138,7 @@ func TestNewBatch(t *testing.T) {
 
 func TestGPool_Cancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	gpool := NewLimitPool(ctx, 100)
+	gpool := pool.NewLimitPool(ctx, 100)
 	go func() {
 		for {
 			select {
@@ -181,7 +183,7 @@ func TestGPool_Cancel(t *testing.T) {
 	for _, wu := range wus {
 		resp, err := wu.Get()
 		fmt.Printf("%v|%v\n", err, resp)
-		if err != nil && err != ErrQueueContextDone {
+		if err != nil && err != pool.ErrQueueContextDone {
 			fmt.Printf("Should Not Timeout %v|%v\n", err, resp)
 			t.FailNow()
 		}

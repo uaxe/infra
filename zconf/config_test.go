@@ -1,6 +1,7 @@
-package zconf
+package zconf_test
 
 import (
+	"github.com/uaxe/infra/zconf"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -26,7 +27,7 @@ func TestLoad(t *testing.T) {
 			return nil
 		}
 		var cfg Config
-		err = Load(path, &cfg)
+		err = zconf.Load(path, &cfg)
 		if err != nil {
 			t.Fatalf("%v", err)
 		}

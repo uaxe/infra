@@ -1,4 +1,4 @@
-package cache
+package cache_test
 
 import (
 	"context"
@@ -7,11 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/uaxe/infra/cache"
 	"github.com/uaxe/infra/schedule"
 )
 
 var tw = schedule.NewTimerWheel(100*time.Millisecond, 10)
-var c = NewLRUCache(context.TODO(), 10000, tw,
+var c = cache.NewLRUCache(context.TODO(), 10000, tw,
 	func(k, v any) {
 		fmt.Printf("OnEvnict %v %v\n", k, v)
 	})

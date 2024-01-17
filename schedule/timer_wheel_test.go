@@ -1,12 +1,14 @@
-package schedule
+package schedule_test
 
 import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/uaxe/infra/schedule"
 )
 
-var tw *TimerWheel = NewTimerWheel(200*time.Millisecond, 1000)
+var tw *schedule.TimerWheel = schedule.NewTimerWheel(200*time.Millisecond, 1000)
 
 func TestHeap(t *testing.T) {
 	tw.RepeatedTimer(5*time.Second, func(now time.Time) {

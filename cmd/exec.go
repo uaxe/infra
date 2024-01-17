@@ -9,8 +9,10 @@ import (
 	"path/filepath"
 )
 
-func ExecCmd(ctx context.Context, name string, args ...string) ([]byte, []byte, error) {
+func ExecCmd(ctx context.Context, envs []string, name, dir string, args ...string) ([]byte, []byte, error) {
 	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Dir = dir
+	cmd.Env = envs
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
