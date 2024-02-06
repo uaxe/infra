@@ -3,16 +3,61 @@ package cmd
 import (
 	"bytes"
 	"context"
-	"io"
-	"os"
 	"os/exec"
-	"path/filepath"
 )
 
-func ExecCmd(ctx context.Context, envs []string, name, dir string, args ...string) ([]byte, []byte, error) {
-	cmd := exec.CommandContext(ctx, name, args...)
-	cmd.Dir = dir
-	cmd.Env = envs
+type (
+	ExecCmd struct {
+		*option
+	}
+
+	option struct {
+		ctx  context.Context
+		name string
+		args []string
+		dir  string
+		env  []string
+	}
+
+	OptionFunc func(opt *option)
+)
+
+func WithName(name string) OptionFunc {
+	return func(opt *option) {
+		opt.name = name
+	}
+}
+
+func WithDir(dir string) OptionFunc {
+	return func(opt *option) {
+		opt.dir = dir
+	}
+}
+
+func WithEnv(env ...string) OptionFunc {
+	return func(opt *option) {
+		opt.env = env
+	}
+}
+
+func WithArgs(args ...string) OptionFunc {
+	return func(opt *option) {
+		opt.args = args
+	}
+}
+
+func NewExecCmd(ctx context.Context, opts ...OptionFunc) *ExecCmd {
+	c := &ExecCmd{option: &option{ctx: ctx}}
+	for i := range opts {
+		opts[i](c.option)
+	}
+	return c
+}
+
+func (c *ExecCmd) Run() ([]byte, []byte, error) {
+	cmd := exec.CommandContext(c.ctx, c.name, c.args...)
+	cmd.Dir = c.dir
+	cmd.Env = c.env
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -20,36 +65,9 @@ func ExecCmd(ctx context.Context, envs []string, name, dir string, args ...strin
 	return stdout.Bytes(), stderr.Bytes(), err
 }
 
-func WriteFileToDir(dir, fname string, r io.Reader) (string, error) {
-	if _, err := os.Lstat(dir); nil != err {
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return "", err
-		}
-	}
-	filePath := filepath.Join(dir, fname)
-	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
-	if nil != err {
-		return "", err
-	}
-	defer func(f *os.File) {
-		_ = f.Close()
-	}(f)
-
-	_, err = io.Copy(f, r)
-	if err != nil {
-		return "", err
-	}
-
-	return filePath, nil
-}
-
-func MkdirAll(dir string) error {
-	if _, err := os.Lstat(dir); err != nil {
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func (c *ExecCmd) CombinedOutput() ([]byte, error) {
+	cmd := exec.CommandContext(c.ctx, c.name, c.args...)
+	cmd.Dir = c.dir
+	cmd.Env = c.env
+	return cmd.CombinedOutput()
 }

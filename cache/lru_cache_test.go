@@ -34,7 +34,6 @@ func TestLRUCache_Put(t *testing.T) {
 	if exist {
 		t.FailNow()
 	}
-
 }
 
 func TestLRUCache_Remove(t *testing.T) {

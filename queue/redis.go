@@ -72,7 +72,7 @@ func NewRedisShard(options RedisOptions) *RedisShard {
 			clusterSDomain = net.JoinHostPort(options.ClusterName, strconv.Itoa(options.BasicPort))
 		}
 
-		//生成master
+		//master
 		rcm, ok := uniqClients[clusterMDomain]
 		if !ok {
 			opt := &redis.Options{
@@ -95,7 +95,7 @@ func NewRedisShard(options RedisOptions) *RedisShard {
 		}
 
 		rcs := rcm
-		//生成slave
+		//slave
 		exist, ok := uniqClients[clusterSDomain]
 		if !ok {
 			opt := &redis.Options{
@@ -230,9 +230,7 @@ const (
 	KeyNotifyTopicPrefix = "_%s:%s:topic_"
 )
 
-func NewRedisQueue(
-	queueMeta QueueMeta,
-	redisInstance *RedisShard,
+func NewRedisQueue(queueMeta QueueMeta, redisInstance *RedisShard,
 	work func(channelid string, raw []byte) error) *RedisQueue {
 
 	ctx, cancel := context.WithCancel(queueMeta.Ctx)
@@ -275,8 +273,6 @@ func NewRedisQueue(
 		self.notifyItems = append(self.notifyItems, item)
 	}
 
-	//如果是订阅主题模式
-	//为了兼容订阅下原始的队列名字
 	if queueMeta.TopicMode {
 		m, _ := self.redisInstance.FindForClient("0", func(key string) int {
 			v, _ := strconv.Atoi(key)
@@ -290,7 +286,6 @@ func NewRedisQueue(
 			ctx:        ctx,
 		}
 
-		//增加原始topic的监听
 		item.key = self.meta.QueueNamePrefix
 		item.notifyTopic = self.meta.QueueNamePrefix
 
@@ -510,7 +505,6 @@ func (self *RedisQueue) handle0(item *notifyItem) error {
 					now := time.Now()
 					if err = self.work(item.key, newraw); err != nil {
 						fmt.Println("RedisQueue|handle0|BLPop.work|FAIL", err, item.key)
-						//ss.Client.LPush(key, raw)
 					}
 					cost := time.Now().Sub(now)
 					if rand.Intn(1000) == 0 && cost.Milliseconds() > 1000 {
