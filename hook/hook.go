@@ -13,7 +13,10 @@ var (
 
 type Hook[T any] interface {
 	Register(p T, index ...int) error
+
 	Get(match func(p T) bool) (T, error)
+
+	Update(match func(T) bool, p T) (T, error)
 }
 
 type providerWrap[T any] struct {
@@ -42,7 +45,6 @@ func (h *IHook[T]) Register(provide T, indexes ...int) error {
 			insertIndex = i
 			break
 		}
-		continue
 	}
 	wrap := &providerWrap[T]{provide: provide, index: index}
 	curr := append(append([]*providerWrap[T]{}, h.providers[0:insertIndex]...), wrap)
@@ -57,5 +59,32 @@ func (h *IHook[T]) Get(match func(T) bool) (m T, e error) {
 		}
 	}
 	e = ErrNotMatchProvider
+	return
+}
+
+func (h *IHook[T]) Update(match func(T) bool, provide T) (m T, e error) {
+	if reflect.TypeOf(provide) == nil {
+		e = ErrNilProvide
+		return
+	}
+	h.lock.Lock()
+	defer h.lock.Unlock()
+	index := 0
+	for i, wrap := range h.providers {
+		if match(wrap.provide) {
+			index = i
+			m = wrap.provide
+			break
+		}
+	}
+
+	if reflect.TypeOf(m) == nil {
+		e = ErrNotMatchProvider
+		return
+	}
+
+	wrap := &providerWrap[T]{provide: provide, index: index}
+	h.providers[index] = wrap
+
 	return
 }
