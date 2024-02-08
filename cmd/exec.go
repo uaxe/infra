@@ -14,8 +14,8 @@ type (
 	option struct {
 		ctx  context.Context
 		name string
-		args []string
 		dir  string
+		args []string
 		env  []string
 	}
 
@@ -46,8 +46,18 @@ func WithArgs(args ...string) OptionFunc {
 	}
 }
 
+func defaultOption(ctx context.Context) *option {
+	return &option{
+		ctx:  ctx,
+		name: "",
+		dir:  "",
+		args: []string{},
+		env:  []string{},
+	}
+}
+
 func NewExecCmd(ctx context.Context, opts ...OptionFunc) *ExecCmd {
-	c := &ExecCmd{option: &option{ctx: ctx}}
+	c := &ExecCmd{option: defaultOption(ctx)}
 	for i := range opts {
 		opts[i](c.option)
 	}
@@ -70,4 +80,12 @@ func (c *ExecCmd) CombinedOutput() ([]byte, error) {
 	cmd.Dir = c.dir
 	cmd.Env = c.env
 	return cmd.CombinedOutput()
+}
+
+func (c *ExecCmd) RunWithFunc(f func(*exec.Cmd)) error {
+	cmd := exec.CommandContext(c.ctx, c.name, c.args...)
+	cmd.Dir = c.dir
+	cmd.Env = c.env
+	f(cmd)
+	return cmd.Run()
 }
