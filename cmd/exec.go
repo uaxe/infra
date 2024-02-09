@@ -89,3 +89,10 @@ func (c *ExecCmd) RunWithFunc(f func(*exec.Cmd)) error {
 	f(cmd)
 	return cmd.Run()
 }
+
+func (c *ExecCmd) Cmd() *exec.Cmd {
+	cmd := exec.CommandContext(c.ctx, c.name, c.args...)
+	cmd.Dir = c.dir
+	cmd.Env = c.env
+	return cmd
+}
