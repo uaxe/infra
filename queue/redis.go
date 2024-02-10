@@ -193,11 +193,11 @@ var defaultHashKeyFunc = func(key string) int {
 var hashByTail = func(key string) int {
 	num := fmt.Sprintf("%x", md5.Sum([]byte(key)))
 	num = num[len(num)-2:]
-	i, err := strconv.ParseInt(num, 16, 64)
+	i, err := strconv.Atoi(num)
 	if err != nil {
 		return 0
 	}
-	return int(i)
+	return i
 }
 
 type notifyItem struct {
