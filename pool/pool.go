@@ -43,10 +43,9 @@ func (wu *WorkUnit) Error(err error) {
 type WorkFunc func(ctx context.Context) (any, error)
 
 type GPool struct {
-	maxcapcity int
-	limiter    chan any
-	ctx        context.Context
-	cancel     context.CancelFunc
+	limiter chan any
+	ctx     context.Context
+	cancel  context.CancelFunc
 }
 
 func NewLimitPool(ctx context.Context, maxcapacity int) *GPool {
@@ -141,12 +140,8 @@ func (p *Batch) Wait(ctx context.Context) ([]*WorkUnit, error) {
 			work: p.works[i],
 			ch:   make(chan *any, 1),
 		}
-		err := p.gopool.queue(wu)
-		if nil != err {
-			if err == ErrQueueTimeout {
+		_ = p.gopool.queue(wu)
 
-			}
-		}
 		wus = append(wus, wu)
 	}
 

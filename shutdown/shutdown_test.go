@@ -24,7 +24,7 @@ func TestShutdown(t *testing.T) {
 	pid := syscall.Getpid()
 	go func() {
 		time.Sleep(time.Second)
-		syscall.Kill(pid, syscall.SIGINT)
+		_ = syscall.Kill(pid, syscall.SIGINT)
 	}()
 	h.WatchSignal()
 }

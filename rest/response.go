@@ -36,7 +36,7 @@ func FailWithMessage(msg string) Response {
 }
 
 func FailWithData(data any, msgs ...string) Response {
-	return Response{StatusError, EmptyData, Msg(MsgFAIL, msgs...)}
+	return Response{StatusError, data, Msg(MsgFAIL, msgs...)}
 }
 
 func Msg(msg string, msgs ...string) string {

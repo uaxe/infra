@@ -47,7 +47,7 @@ func HttpLanguage(req *http.Request) string {
 	if strings.Index(lang, ",") > 0 {
 		lang = lang[:strings.Index(lang, ",")]
 	}
-	if len(lang) <= 0 {
+	if len(lang) == 0 {
 		lang = LangDefault
 	}
 	return lang

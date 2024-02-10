@@ -3,10 +3,9 @@ package zlog
 import (
 	"strings"
 
+	"github.com/uaxe/infra/zlog/zapx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/uaxe/infra/zlog/zapx"
 )
 
 func Zap(directory, prefix, format, stacktraceKey, level,

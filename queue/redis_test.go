@@ -21,12 +21,8 @@ func TestRedisHash(t *testing.T) {
 
 	hs := queue.NewRedisShard(options)
 
-	master, slave := hs.FindForClient("100001", nil)
-	t.Logf("TestRedisHash|FindForClient(100001, nil)|%s|%s\n", master.Hostport, slave.Hostport)
-
 	sc := hs.ShardNum()
 	if sc != 2 {
 		t.Fail()
 	}
-	t.Logf("ShardNum|%d\n", sc)
 }

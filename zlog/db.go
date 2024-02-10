@@ -3,12 +3,13 @@ package zlog
 import (
 	"context"
 	"errors"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"runtime"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type dbLog struct {
@@ -25,28 +26,28 @@ func (db *dbLog) LogMode(level logger.LogLevel) logger.Interface {
 	return db
 }
 
-func (db *dbLog) Info(ctx context.Context, msg string, data ...any) {
+func (db *dbLog) Info(_ context.Context, msg string, data ...any) {
 	if db.LogLevel < logger.Info {
 		return
 	}
-	db.Log.Info("db info:", zap.Any("data", data))
+	db.Log.Info("db info:"+msg, zap.Any("data", data))
 }
 
-func (db *dbLog) Warn(ctx context.Context, msg string, data ...any) {
+func (db *dbLog) Warn(_ context.Context, msg string, data ...any) {
 	if db.LogLevel < logger.Warn {
 		return
 	}
 	db.Log.Warn("db warn:"+msg, zap.Any("data", data))
 }
 
-func (db *dbLog) Error(ctx context.Context, msg string, data ...any) {
+func (db *dbLog) Error(_ context.Context, msg string, data ...any) {
 	if db.LogLevel < logger.Error {
 		return
 	}
 	db.Log.Error("db err:"+msg, zap.Any("data", data))
 }
 
-func (db *dbLog) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
+func (db *dbLog) Trace(_ context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
 	if db.LogLevel <= logger.Silent {
 		return
 	}

@@ -8,7 +8,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/redis/go-redis/v9 v9.4.0
 	go.uber.org/zap v1.26.0
-	golang.org/x/crypto v0.18.0
+	golang.org/x/crypto v0.19.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/gorm v1.25.6
 )
@@ -23,4 +23,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/term v0.17.0 // indirect
 )

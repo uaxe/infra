@@ -22,7 +22,7 @@ func Struct2MapOptionWithTag(tag string) Struct2MapOption {
 func Struct2Map(x any, opts ...Struct2MapOption) (map[string]any, error) {
 	t, v := TypeAndValue(x)
 	if v.Kind() != reflect.Struct {
-		return nil, errors.New("struct not found!")
+		return nil, errors.New("struct not found")
 	}
 	if len(opts) == 0 {
 		opts = append(opts, Struct2MapOptionWithTag("json"))

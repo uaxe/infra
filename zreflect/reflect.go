@@ -154,7 +154,7 @@ func CallMethodByName(rcvr any, methodName string, params ...any) ([]reflect.Val
 	}
 
 	if kind != reflect.Struct && kind != reflect.Interface {
-		return nil, fmt.Errorf("param 'rcvr' should be struct or interface type.")
+		return nil, fmt.Errorf("param 'rcvr' should be struct or interface type")
 	}
 	for m := 0; m < typ.NumMethod(); m++ {
 		method := typ.Method(m)

@@ -155,7 +155,7 @@ func (lt loggedThrottle) doReq(req func() error, fallback func(err error) error,
 }
 
 func (lt loggedThrottle) logError(err error) error {
-	if err == ErrServiceUnavailable {
+	if errors.Is(err, ErrServiceUnavailable) {
 		log.Printf("%s breaker is open and requests dropped\nlast errors:\n %s", lt.name, lt.errWin)
 	}
 	return err

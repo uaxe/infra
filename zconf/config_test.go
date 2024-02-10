@@ -1,11 +1,12 @@
 package zconf_test
 
 import (
-	"github.com/uaxe/infra/zconf"
 	"io/fs"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/uaxe/infra/zconf"
 )
 
 type Config struct {
@@ -23,6 +24,9 @@ type Config struct {
 
 func TestLoad(t *testing.T) {
 	err := filepath.Walk("./testdata", func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if info.IsDir() {
 			return nil
 		}

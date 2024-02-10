@@ -1,14 +1,17 @@
 package crypto
 
 import (
-	"fmt"
 	"io"
+)
+
+const (
+	aesKeySize = 32
+	ivSize     = 16
 )
 
 // aesCtrCipherBuilder for building ContentCipher
 type aesCtrCipherBuilder struct {
 	MasterCipher MasterCipher
-	aesKeySize   int
 }
 
 // aesCtrCipher will use aes ctr algorithm
@@ -18,27 +21,21 @@ type aesCtrCipher struct {
 }
 
 // CreateAesCtrCipher creates ContentCipherBuilder
-func CreateAesCtrCipher(cipher MasterCipher, aesType AesType) ContentCipherBuilder {
-	switch aesType {
-	default:
-		panic(fmt.Sprintf("aes type unknown %d", aesType))
-	case AES_TYPE_128, AES_TYPE_192, AES_TYPE_256:
-		break
-	}
-	return aesCtrCipherBuilder{MasterCipher: cipher, aesKeySize: int(aesType)}
+func CreateAesCtrCipher(cipher MasterCipher) ContentCipherBuilder {
+	return aesCtrCipherBuilder{MasterCipher: cipher}
 }
 
 // createCipherData create CipherData for encrypt object data
 func (builder aesCtrCipherBuilder) createCipherData() (CipherData, error) {
 	var cd CipherData
 	var err error
-	err = cd.RandomKeyIv(builder.aesKeySize, builder.aesKeySize)
+	err = cd.RandomKeyIv(aesKeySize, ivSize)
 	if err != nil {
 		return cd, err
 	}
 
 	cd.WrapAlgorithm = builder.MasterCipher.GetWrapAlgorithm()
-	cd.CEKAlgorithm = "AES/CTR/NoPadding"
+	cd.CEKAlgorithm = AesCtrAlgorithm
 	cd.MatDesc = builder.MasterCipher.GetMatDesc()
 
 	// EncryptedKey

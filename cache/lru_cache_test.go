@@ -30,7 +30,7 @@ func TestLRUCache_Put(t *testing.T) {
 	}
 	t.Log(v)
 	time.Sleep(11 * time.Second)
-	v, exist = c.Get("100777")
+	_, exist = c.Get("100777")
 	if exist {
 		t.FailNow()
 	}

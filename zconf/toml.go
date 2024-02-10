@@ -2,13 +2,14 @@ package zconf
 
 import (
 	"bytes"
+
 	toml "github.com/BurntSushi/toml"
 )
 
 type Toml struct {
-	name, indent string
-	marshaler    func(any) ([]byte, error)
-	unmarshaler  func([]byte, any) error
+	name        string
+	marshaler   func(any) ([]byte, error)
+	unmarshaler func([]byte, any) error
 }
 
 var TOMLDirver = JSON{
@@ -25,14 +26,14 @@ var TOMLDirver = JSON{
 
 var _ Driver = (*Toml)(nil)
 
-func (self *Toml) Name() string {
-	return self.name
+func (t *Toml) Name() string {
+	return t.name
 }
 
-func (self *Toml) Marshal(in any) ([]byte, error) {
-	return self.marshaler(in)
+func (t *Toml) Marshal(in any) ([]byte, error) {
+	return t.marshaler(in)
 }
 
-func (self *Toml) Unmarshal(in []byte, out any) error {
-	return self.unmarshaler(in, out)
+func (t *Toml) Unmarshal(in []byte, out any) error {
+	return t.unmarshaler(in, out)
 }

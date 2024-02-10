@@ -12,8 +12,8 @@ import (
 func TestExecCmd(t *testing.T) {
 	c := cmd.NewExecCmd(
 		context.Background(),
-		cmd.WithName("go"),
-		cmd.WithArgs("version"),
+		cmd.WithName("ls"),
+		cmd.WithArgs("."),
 	)
 	stdout, stderr, err := c.Run()
 	if err != nil {
@@ -34,8 +34,8 @@ func TestExecCmd_RunWithFunc(t *testing.T) {
 
 	c := cmd.NewExecCmd(
 		context.Background(),
-		cmd.WithName("go"),
-		cmd.WithArgs("version"),
+		cmd.WithName("ls"),
+		cmd.WithArgs("."),
 	)
 
 	var stdout, stderr bytes.Buffer

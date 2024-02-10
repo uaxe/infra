@@ -27,4 +27,6 @@ func ExampleMergeStruct() {
 	fmt.Printf("%#v\n", dst.Age == 1)
 	// Output:
 	// <nil>
+	// true
+	// true
 }

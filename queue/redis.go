@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"crypto/tls"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -72,7 +73,6 @@ func NewRedisShard(options RedisOptions) *RedisShard {
 			clusterSDomain = net.JoinHostPort(options.ClusterName, strconv.Itoa(options.BasicPort))
 		}
 
-		//master
 		rcm, ok := uniqClients[clusterMDomain]
 		if !ok {
 			opt := &redis.Options{
@@ -94,9 +94,7 @@ func NewRedisShard(options RedisOptions) *RedisShard {
 			uniqClients[clusterMDomain] = rcm
 		}
 
-		rcs := rcm
-		//slave
-		exist, ok := uniqClients[clusterSDomain]
+		rcs, ok := uniqClients[clusterSDomain]
 		if !ok {
 			opt := &redis.Options{
 				Addr:            clusterSDomain,
@@ -112,10 +110,9 @@ func NewRedisShard(options RedisOptions) *RedisShard {
 				host := strings.Split(clusterSDomain, ":")[0]
 				opt.TLSConfig = &tls.Config{ServerName: host}
 			}
-			exist = redis.NewClient(opt)
-			uniqClients[clusterSDomain] = exist
+			rcs = redis.NewClient(opt)
+			uniqClients[clusterSDomain] = rcs
 		}
-		rcs = exist
 
 		master := make([]*RedisNode, 0, hash)
 		slave := make([]*RedisNode, 0, hash)
@@ -296,11 +293,11 @@ func NewRedisQueue(queueMeta QueueMeta, redisInstance *RedisShard,
 	return self
 }
 
-func (self *RedisQueue) Start() error {
+func (q *RedisQueue) Start() error {
 	redisNodes := make(map[string]*RedisNode)
 	subscribes := make(map[string][]string)
-	for i := range self.notifyItems {
-		item := self.notifyItems[i]
+	for i := range q.notifyItems {
+		item := q.notifyItems[i]
 		hostport := item.redisNode.Hostport
 		if _, ok := redisNodes[hostport]; !ok {
 			redisNodes[hostport] = item.redisNode
@@ -312,25 +309,25 @@ func (self *RedisQueue) Start() error {
 		subscribes[hostport] = append(v, item.notifyTopic)
 	}
 
-	if self.meta.TopicMode {
+	if q.meta.TopicMode {
 		subChannels := make([]*redis.PubSub, 0, len(subscribes))
 		for node, topics := range subscribes {
 			if redisnode, ok := redisNodes[node]; ok {
-				sub := redisnode.Client.Subscribe(self.ctx, topics...)
+				sub := redisnode.Client.Subscribe(q.ctx, topics...)
 				subChannels = append(subChannels, sub)
 			} else {
 				panic(fmt.Errorf("no reidsNode [%s]", node))
 			}
 		}
-		self.startTopics(self.work, subChannels...)
+		q.startTopics(q.work, subChannels...)
 	} else {
 		wakeupQueuePop := func(topic string, raw []byte) error {
-			item, ok := self.topic2Items[topic]
+			item, ok := q.topic2Items[topic]
 			if ok {
 				select {
 				case item.notifyChan <- nil:
 					select {
-					case self.wakeupChan <- nil:
+					case q.wakeupChan <- nil:
 					default:
 					}
 				default:
@@ -343,25 +340,25 @@ func (self *RedisQueue) Start() error {
 		subChannels := make([]*redis.PubSub, 0, len(subscribes))
 		for node, topics := range subscribes {
 			for _, topic := range topics {
-				if _, ok := self.topic2Items[topic]; ok {
-					notifyitems = append(notifyitems, self.topic2Items[topic])
+				if _, ok := q.topic2Items[topic]; ok {
+					notifyitems = append(notifyitems, q.topic2Items[topic])
 				}
 			}
 			if redisnode, ok := redisNodes[node]; ok {
-				sub := redisnode.Client.Subscribe(self.ctx, topics...)
+				sub := redisnode.Client.Subscribe(q.ctx, topics...)
 				subChannels = append(subChannels, sub)
 			} else {
 				panic(fmt.Errorf("no reidsNode %s", node))
 			}
 		}
-		self.startTopics(wakeupQueuePop, subChannels...)
-		self.startCore(notifyitems...)
+		q.startTopics(wakeupQueuePop, subChannels...)
+		q.startCore(notifyitems...)
 	}
 	return nil
 }
 
-func (self *RedisQueue) NotifyAll() {
-	for _, item := range self.notifyItems {
+func (q *RedisQueue) NotifyAll() {
+	for _, item := range q.notifyItems {
 		select {
 		case item.notifyChan <- nil:
 		default:
@@ -369,33 +366,33 @@ func (self *RedisQueue) NotifyAll() {
 		fmt.Println("RedisQueue|NotifyAll...", item.key, item.notifyTopic)
 	}
 	select {
-	case self.wakeupChan <- nil:
+	case q.wakeupChan <- nil:
 	default:
 	}
 }
 
-func (self *RedisQueue) startCore(items ...*notifyItem) {
+func (q *RedisQueue) startCore(items ...*notifyItem) {
 	go func() {
 		for {
 			select {
-			case <-self.ctx.Done():
-				_ = self.Close()
+			case <-q.ctx.Done():
+				_ = q.Close()
 				return
-			case <-self.wakeupChan:
+			case <-q.wakeupChan:
 				for i := range items {
 					item := items[i]
 					select {
-					case <-self.ctx.Done():
-						_ = self.Close()
+					case <-q.ctx.Done():
+						_ = q.Close()
 						return
 					case <-item.notifyChan:
-						_, loaded := self.submitTasks.LoadOrStore(item.key, 1)
+						_, loaded := q.submitTasks.LoadOrStore(item.key, 1)
 						if !loaded {
 							go func() {
 								defer func() {
-									self.submitTasks.Delete(item.key)
+									q.submitTasks.Delete(item.key)
 								}()
-								err := self.handle0(item)
+								err := q.handle0(item)
 								if err != nil {
 									fmt.Println("redisQueue|notify|handleCore|Fail", err, item.key)
 								}
@@ -410,10 +407,10 @@ func (self *RedisQueue) startCore(items ...*notifyItem) {
 	}()
 }
 
-func (self *RedisQueue) Push(ctx context.Context, hashid string, raw []byte) (bool, error) {
+func (q *RedisQueue) Push(ctx context.Context, hashid string, raw []byte) (bool, error) {
 
-	idx := hashByTail(hashid) % self.meta.HashSize
-	item := self.notifyItems[idx]
+	idx := hashByTail(hashid) % q.meta.HashSize
+	item := q.notifyItems[idx]
 
 	strData := base64.StdEncoding.EncodeToString(raw)
 
@@ -427,21 +424,21 @@ func (self *RedisQueue) Push(ctx context.Context, hashid string, raw []byte) (bo
 	}
 
 	select {
-	case self.wakeupChan <- nil:
+	case q.wakeupChan <- nil:
 	default:
 	}
 
 	return true, nil
 }
 
-func (self *RedisQueue) Publish(ctx context.Context, hashid string, raw []byte) {
-	idx := hashByTail(hashid) % self.meta.HashSize
-	item := self.notifyItems[idx]
+func (q *RedisQueue) Publish(ctx context.Context, hashid string, raw []byte) {
+	idx := hashByTail(hashid) % q.meta.HashSize
+	item := q.notifyItems[idx]
 	strData := base64.StdEncoding.EncodeToString(raw)
 	item.redisNode.Client.Publish(ctx, item.notifyTopic, strData)
 }
 
-func (self *RedisQueue) startTopics(onTopic func(channelid string, raw []byte) error, pubsubs ...*redis.PubSub) {
+func (q *RedisQueue) startTopics(onTopic func(channelid string, raw []byte) error, pubsubs ...*redis.PubSub) {
 
 	for i := range pubsubs {
 		sub := pubsubs[i]
@@ -449,12 +446,11 @@ func (self *RedisQueue) startTopics(onTopic func(channelid string, raw []byte) e
 		go func() {
 			for {
 				select {
-				case <-self.ctx.Done():
+				case <-q.ctx.Done():
 					_ = sub.Close()
 					return
 				case msg := <-subChan:
 					topicChannel := msg.Channel
-					//获取消息
 					raw, err := base64.StdEncoding.DecodeString(msg.Payload)
 					if err == nil {
 						func() {
@@ -476,7 +472,7 @@ var (
 	ErrNoData = fmt.Errorf("no data error")
 )
 
-func (self *RedisQueue) handle0(item *notifyItem) error {
+func (q *RedisQueue) handle0(item *notifyItem) error {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -486,27 +482,27 @@ func (self *RedisQueue) handle0(item *notifyItem) error {
 	for {
 
 		select {
-		case <-self.ctx.Done():
+		case <-q.ctx.Done():
 			return nil
 		default:
-			raw, err := item.redisNode.Client.LPop(self.ctx, item.key).Result()
-			if err != nil && err != redis.Nil {
+			raw, err := item.redisNode.Client.LPop(q.ctx, item.key).Result()
+			if err != nil && !errors.Is(err, redis.Nil) {
 				fmt.Println("RedisQueue|handle0|LPop|Fail", err, item.key)
 				return err
 			}
 
-			if err == redis.Nil || len(raw) <= 0 {
+			if errors.Is(err, redis.Nil) || len(raw) == 0 {
 				return nil
 			}
 
 			if len(raw) > 0 {
 				newraw, _ := base64.StdEncoding.DecodeString(raw)
-				if self.work != nil {
+				if q.work != nil {
 					now := time.Now()
-					if err = self.work(item.key, newraw); err != nil {
+					if err = q.work(item.key, newraw); err != nil {
 						fmt.Println("RedisQueue|handle0|BLPop.work|FAIL", err, item.key)
 					}
-					cost := time.Now().Sub(now)
+					cost := time.Since(now)
 					if rand.Intn(1000) == 0 && cost.Milliseconds() > 1000 {
 						fmt.Println("RedisQueue|handle0|BLPop.work|SLOW", item.key, cost.Milliseconds())
 					}
@@ -518,12 +514,12 @@ func (self *RedisQueue) handle0(item *notifyItem) error {
 	}
 }
 
-func (self *RedisQueue) Length() int {
+func (q *RedisQueue) Length() int {
 
 	length := 0
-	for _, item := range self.notifyItems {
-		l, err := item.redisNode.Client.LLen(self.ctx, item.key).Result()
-		if err != nil && err != redis.Nil {
+	for _, item := range q.notifyItems {
+		l, err := item.redisNode.Client.LLen(q.ctx, item.key).Result()
+		if err != nil && !errors.Is(err, redis.Nil) {
 			fmt.Println("RedisQueue|Length|Fail", err, item.key)
 			continue
 		}
@@ -533,12 +529,12 @@ func (self *RedisQueue) Length() int {
 	return length
 }
 
-func (self *RedisQueue) QueueURL() string {
-	return self.redisInstance.options.String()
+func (q *RedisQueue) QueueURL() string {
+	return q.redisInstance.options.String()
 }
 
-func (self *RedisQueue) Close() error {
-	self.cancel()
-	fmt.Println("RedisQueue|Close|SUCC", self.meta.QueueNamePrefix, self.QueueURL())
+func (q *RedisQueue) Close() error {
+	q.cancel()
+	fmt.Println("RedisQueue|Close|SUCC", q.meta.QueueNamePrefix, q.QueueURL())
 	return nil
 }

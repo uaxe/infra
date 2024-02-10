@@ -3,9 +3,10 @@ package zhttp_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uaxe/infra/zhttp"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/uaxe/infra/zhttp"
 )
 
 type Ret struct {
@@ -15,14 +16,14 @@ type Ret struct {
 	Age         int    `json:"age,omitempty"`
 }
 
-func ExampleParse() {
+func ExampleDefaultRespParse() {
 	r, _ := http.NewRequest("GET", "/", nil)
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Request-ID", "1")
 		rr := Ret{Name: "zkep", Age: 18}
 		raw, _ := json.Marshal(rr)
-		w.Write(raw)
+		_, _ = w.Write(raw)
 	})
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, r)

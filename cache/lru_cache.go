@@ -21,7 +21,7 @@ type LRUCache struct {
 	ctx   context.Context
 	hit   uint64
 	total uint64
-	cache *cache
+	cache *Cache
 	tw    *schedule.TimerWheel
 }
 
@@ -35,7 +35,7 @@ func NewLRUCache(
 	c.OnEvicted = func(key, value any) {
 		vv := value.(Entry)
 		if OnEvicted != nil {
-			OnEvicted(key.(any), vv.Value)
+			OnEvicted(key, vv.Value)
 		}
 		expiredTw.CancelTimer(vv.Timerid)
 	}
@@ -64,10 +64,6 @@ func (l *LRUCache) Get(key any) (any, bool) {
 		return v.(Entry).Value, true
 	}
 	return nil, false
-}
-
-func (l *LRUCache) onMessage(key any) {
-	l.Remove(key)
 }
 
 func (l *LRUCache) Put(key, v any, ttl time.Duration) chan time.Time {

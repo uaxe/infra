@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	dirvers = map[string]Driver{
+	drivers = map[string]Driver{
 		".json": &JSONDirver,
 		".toml": &TOMLDirver,
 		".yaml": &YAMLDirver,
@@ -16,9 +16,9 @@ var (
 	}
 )
 
-func Load(fpath string, val any, opts ...OptionFunc) error {
+func Load(fpath string, val any) error {
 	ext := filepath.Ext(fpath)
-	dirver, ok := dirvers[ext]
+	dirver, ok := drivers[ext]
 	if !ok {
 		return fmt.Errorf("%s dirver not support", ext)
 	}
@@ -26,7 +26,7 @@ func Load(fpath string, val any, opts ...OptionFunc) error {
 	if err != nil {
 		return err
 	}
-	defer fi.Close()
+	defer func() { _ = fi.Close() }()
 	if _, err = fi.Stat(); err != nil {
 		return err
 	}
@@ -34,20 +34,17 @@ func Load(fpath string, val any, opts ...OptionFunc) error {
 	if err != nil {
 		return err
 	}
-	if err = dirver.Unmarshal(raw, val); err != nil {
-		return err
-	}
-	return nil
+	return dirver.Unmarshal(raw, val)
 }
 
-func LoadJSONBytes(raw []byte, val any, opts ...OptionFunc) error {
+func LoadJSONBytes(raw []byte, val any) error {
 	return JSONDirver.Unmarshal(raw, val)
 }
 
-func LoadTOMLBytes(raw []byte, val any, opts ...OptionFunc) error {
+func LoadTOMLBytes(raw []byte, val any) error {
 	return TOMLDirver.Unmarshal(raw, val)
 }
 
-func LoadYAMLBytes(raw []byte, val any, opts ...OptionFunc) error {
+func LoadYAMLBytes(raw []byte, val any) error {
 	return YAMLDirver.Unmarshal(raw, val)
 }

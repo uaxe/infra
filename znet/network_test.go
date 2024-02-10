@@ -2,8 +2,9 @@ package znet_test
 
 import (
 	"fmt"
-	"github.com/uaxe/infra/znet"
 	"net"
+
+	"github.com/uaxe/infra/znet"
 )
 
 func ExampleDefaultOrAvailablePort() {
@@ -17,7 +18,7 @@ func ExampleDefaultOrAvailablePort() {
 		fmt.Printf("%#v\n", err)
 		return
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 
 	port = znet.DefaultOrAvailablePortWithFunc(defaultPort, func(err error) {
 		fmt.Printf("%#v\n", err)

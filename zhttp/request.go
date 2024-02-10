@@ -24,11 +24,11 @@ func NewRequest(opts ...RequestOption) Request {
 	return r
 }
 
-func (self *DefaultRequest) Do(r *http.Request) (*http.Response, error) {
+func (*DefaultRequest) Do(r *http.Request) (*http.Response, error) {
 	return DefaultClient.Do(r)
 }
 
-func (self *DefaultRequest) ContextDo(ctx context.Context, r *http.Request) (*http.Response, error) {
+func (*DefaultRequest) ContextDo(ctx context.Context, r *http.Request) (*http.Response, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()

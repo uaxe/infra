@@ -37,7 +37,7 @@ type MasterRsaCipher struct {
 
 // GetWrapAlgorithm get master key wrap algorithm
 func (mrc MasterRsaCipher) GetWrapAlgorithm() string {
-	return "RSA/NONE/PKCS1Padding"
+	return RsaCryptoWrap
 }
 
 // GetMatDesc get master key describe

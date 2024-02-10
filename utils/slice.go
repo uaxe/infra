@@ -45,7 +45,6 @@ func SliceRange[M ~[]V, V any](m M, f func(V) bool) {
 			return
 		}
 	}
-	return
 }
 
 func SliceToMap[M ~[]V, V comparable](m M) map[V]struct{} {

@@ -36,7 +36,7 @@ type ctrEncryptReader struct {
 }
 
 func (reader *ctrEncryptReader) Read(data []byte) (int, error) {
-	plainText := make([]byte, len(data), len(data))
+	plainText := make([]byte, len(data))
 	n, err := reader.src.Read(plainText)
 	if n > 0 {
 		plainText = plainText[0:n]
@@ -58,7 +58,7 @@ type ctrDecryptReader struct {
 }
 
 func (reader *ctrDecryptReader) Read(data []byte) (int, error) {
-	cryptoText := make([]byte, len(data), len(data))
+	cryptoText := make([]byte, len(data))
 	n, err := reader.src.Read(cryptoText)
 	if n > 0 {
 		cryptoText = cryptoText[0:n]

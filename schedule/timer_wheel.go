@@ -56,7 +56,7 @@ func (h *TimerHeap) Pop() any {
 	return item
 }
 
-var timerIds uint32 = 0
+var timerIds uint32
 
 const (
 	MinInterval = 100 * time.Millisecond

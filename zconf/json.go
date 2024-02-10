@@ -5,9 +5,9 @@ import (
 )
 
 type JSON struct {
-	name, indent string
-	marshaler    func(any) ([]byte, error)
-	unmarshaler  func([]byte, any) error
+	name        string
+	marshaler   func(any) ([]byte, error)
+	unmarshaler func([]byte, any) error
 }
 
 var JSONDirver = JSON{
@@ -22,14 +22,14 @@ var JSONDirver = JSON{
 
 var _ Driver = (*JSON)(nil)
 
-func (self *JSON) Name() string {
-	return self.name
+func (j *JSON) Name() string {
+	return j.name
 }
 
-func (self *JSON) Marshal(in any) ([]byte, error) {
-	return self.marshaler(in)
+func (j *JSON) Marshal(in any) ([]byte, error) {
+	return j.marshaler(in)
 }
 
-func (self *JSON) Unmarshal(in []byte, out any) error {
-	return self.unmarshaler(in, out)
+func (j *JSON) Unmarshal(in []byte, out any) error {
+	return j.unmarshaler(in, out)
 }

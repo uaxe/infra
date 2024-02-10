@@ -3,9 +3,10 @@ package zhttp
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/uaxe/infra/binder"
 	"io"
 	"net/http"
+
+	"github.com/uaxe/infra/binder"
 )
 
 type ResponseParse interface {
@@ -21,23 +22,18 @@ var (
 
 type defaultParse struct{}
 
-func (self *defaultParse) Parse(r *http.Response, obj any) error {
-	if err := self.ParseBody(r, obj); err != nil {
+func (p *defaultParse) Parse(r *http.Response, obj any) error {
+	if err := p.ParseBody(r, obj); err != nil {
 		return err
 	}
-
-	if err := self.ParseHeader(r, obj); err != nil {
-		return err
-	}
-
-	return nil
+	return p.ParseHeader(r, obj)
 }
 
-func (self *defaultParse) ParseHeader(r *http.Response, obj any) error {
+func (p *defaultParse) ParseHeader(r *http.Response, obj any) error {
 	return binder.Header.Binding(r.Header, obj)
 }
 
-func (self *defaultParse) ParseBody(r *http.Response, obj any) error {
+func (p *defaultParse) ParseBody(r *http.Response, obj any) error {
 	switch r.Header.Get("Content-Type") {
 	case "application/json":
 		raw, err := io.ReadAll(r.Body)

@@ -3,11 +3,11 @@ package zfs
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"unsafe"
 )
 
@@ -89,31 +89,6 @@ func FileExists(path string) bool {
 	return fi.Mode().IsRegular()
 }
 
-// RelativePath returns a qualified path created by joining the
-// directory of the calling file and the given relative path.
-//
-// Example: RelativePath("..") in *this* file would give you '/path/to/wails2/v2/internal`
-func RelativePath(relativepath string, optionalpaths ...string) string {
-	_, thisFile, _, _ := runtime.Caller(1)
-	localDir := filepath.Dir(thisFile)
-
-	// If we have optional paths, join them to the relativepath
-	if len(optionalpaths) > 0 {
-		paths := []string{relativepath}
-		paths = append(paths, optionalpaths...)
-		relativepath = filepath.Join(paths...)
-	}
-	result, err := filepath.Abs(filepath.Join(localDir, relativepath))
-	if err != nil {
-		// I'm allowing this for 1 reason only: It's fatal if the path
-		// supplied is wrong as it's only used internally in Wails. If we get
-		// that path wrong, we should know about it immediately. The other reason is
-		// that it cuts down a ton of unnecessary error handling.
-		panic(err)
-	}
-	return result
-}
-
 // MustLoadString attempts to load a string and will abort with a fatal message if
 // something goes wrong
 func MustLoadString(filename string) string {
@@ -181,7 +156,7 @@ func DirIsEmpty(dir string) (bool, error) {
 	defer f.Close()
 
 	_, err = f.Readdirnames(1) // Or f.Readdir(1)
-	if err == io.EOF {
+	if errors.Is(err, io.EOF) {
 		return true, nil
 	}
 	return false, err // Either not empty or error, suits both cases
@@ -205,7 +180,7 @@ func CopyDir(src string, dst string) (err error) {
 
 	_, err = os.Stat(dst)
 	if err != nil && !os.IsNotExist(err) {
-		return
+		return err
 	}
 	if err == nil {
 		return fmt.Errorf("destination already exists")
@@ -213,12 +188,12 @@ func CopyDir(src string, dst string) (err error) {
 
 	err = MkDirs(dst)
 	if err != nil {
-		return
+		return err
 	}
 
 	entries, err := os.ReadDir(src)
 	if err != nil {
-		return
+		return err
 	}
 
 	for _, entry := range entries {
@@ -228,7 +203,7 @@ func CopyDir(src string, dst string) (err error) {
 		if entry.IsDir() {
 			err = CopyDir(srcPath, dstPath)
 			if err != nil {
-				return
+				return err
 			}
 		} else {
 			// Skip symlinks.
@@ -238,12 +213,12 @@ func CopyDir(src string, dst string) (err error) {
 
 			err = CopyFile(srcPath, dstPath)
 			if err != nil {
-				return
+				return err
 			}
 		}
 	}
 
-	return
+	return nil
 }
 
 // SetPermissions recursively sets file permissions on a directory

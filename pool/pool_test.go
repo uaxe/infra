@@ -2,6 +2,7 @@ package pool_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"testing"
@@ -48,7 +49,7 @@ func TestGPool_Queue(t *testing.T) {
 		t.FailNow()
 	}
 
-	cost := time.Now().Sub(now) / time.Second
+	cost := time.Since(now)
 
 	if cost < 5 {
 		fmt.Printf("TooFast|WaitResp:%v\t%v\n", err, resp)
@@ -60,6 +61,7 @@ func TestGPool_Queue(t *testing.T) {
 
 func TestNewBatch(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	gpool := pool.NewLimitPool(ctx, 100)
 	go func() {
 		for {
@@ -138,6 +140,7 @@ func TestNewBatch(t *testing.T) {
 
 func TestGPool_Cancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	gpool := pool.NewLimitPool(ctx, 100)
 	go func() {
 		for {
@@ -172,7 +175,7 @@ func TestGPool_Cancel(t *testing.T) {
 		t.FailNow()
 	}
 
-	cost := time.Now().Sub(now)
+	cost := time.Since(now)
 	fmt.Printf("Get Responses COST: %v\n", cost)
 	if cost/time.Second > 2 {
 		fmt.Printf("Get Responses Should Less Than 2s : %v\n", cost/time.Second)
@@ -183,7 +186,7 @@ func TestGPool_Cancel(t *testing.T) {
 	for _, wu := range wus {
 		resp, err := wu.Get()
 		fmt.Printf("%v|%v\n", err, resp)
-		if err != nil && err != pool.ErrQueueContextDone {
+		if err != nil && errors.Is(err, pool.ErrQueueContextDone) {
 			fmt.Printf("Should Not Timeout %v|%v\n", err, resp)
 			t.FailNow()
 		}

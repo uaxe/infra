@@ -26,11 +26,11 @@ func ScheduleAtFixRate(delay time.Duration, period time.Duration, callback func(
 		for {
 			now := time.Now()
 
-			callback(now)
-		
+			_ = callback(now)
+
 			timeRange := int64(now.Sub(initT)) / int64(period)
 			if int64(now.Sub(initT))%int64(period) != 0 {
-				timeRange += 1
+				timeRange++
 			}
 
 			next := initT.Add(time.Duration(timeRange) * period)

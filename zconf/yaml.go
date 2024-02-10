@@ -22,14 +22,14 @@ var YAMLDirver = Yaml{
 
 var _ Driver = (*Yaml)(nil)
 
-func (self *Yaml) Name() string {
-	return self.name
+func (y *Yaml) Name() string {
+	return y.name
 }
 
-func (self *Yaml) Marshal(in any) ([]byte, error) {
-	return self.marshaler(in)
+func (y *Yaml) Marshal(in any) ([]byte, error) {
+	return y.marshaler(in)
 }
 
-func (self *Yaml) Unmarshal(in []byte, out any) error {
-	return self.unmarshaler(in, out)
+func (y *Yaml) Unmarshal(in []byte, out any) error {
+	return y.unmarshaler(in, out)
 }

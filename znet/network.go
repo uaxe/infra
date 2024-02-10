@@ -6,11 +6,12 @@ import (
 )
 
 func AvailablePort() (int, error) {
-	listener, err := net.Listen("tcp", ":0")
+	address := fmt.Sprintf(":%d", 0)
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return 0, err
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 	return listener.Addr().(*net.TCPAddr).Port, nil
 }
 
@@ -20,7 +21,7 @@ func IsPortAvailable(port int) bool {
 	if err != nil {
 		return false
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 	return true
 }
 

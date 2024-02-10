@@ -2,9 +2,10 @@ package zhash
 
 import (
 	"encoding/hex"
-	"golang.org/x/crypto/bcrypt"
 	"hash"
 	"io"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func BcryptHash(password string) string {

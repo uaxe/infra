@@ -91,28 +91,29 @@ func defaultOption(directory string) *FileRotateOption {
 	}
 }
 
-func (self *FileRotatelogs) levelPath(level string) string {
-	p := fmt.Sprintf("%s%s", level, self.option.logExt)
-	if self.option.prefix != "" {
-		p = fmt.Sprintf("%s.%s", self.option.prefix, p)
+func (f *FileRotatelogs) levelPath(level string) string {
+	p := fmt.Sprintf("%s%s", level, f.option.logExt)
+	if f.option.prefix != "" {
+		p = fmt.Sprintf("%s.%s", f.option.prefix, p)
 	}
-	lp := path.Join(self.option.directory, "%Y-%m-%d", p)
-	if self.option.levelPathFn != nil {
-		lp = self.option.levelPathFn(level)
+	lp := path.Join(f.option.directory, "%Y-%m-%d", p)
+	if f.option.levelPathFn != nil {
+		lp = f.option.levelPathFn(level)
 	}
 	return lp
 }
 
-func (self *FileRotatelogs) GetWriteSyncer(level string) (zapcore.WriteSyncer, error) {
+func (f *FileRotatelogs) GetWriteSyncer(level string) (zapcore.WriteSyncer, error) {
 	writer := make([]zapcore.WriteSyncer, 0, 2)
-	if self.option.fileWriter {
-		if ok, _ := PathExists(self.option.directory); !ok {
-			_ = os.Mkdir(self.option.directory, os.ModePerm)
+	if f.option.fileWriter {
+		if ok, _ := PathExists(f.option.directory); !ok {
+			_ = os.Mkdir(f.option.directory, os.ModePerm)
 		}
+
 		fileWriter, err := rotatelogs.New(
-			self.levelPath(level),
+			f.levelPath(level),
 			rotatelogs.WithClock(rotatelogs.Local),
-			rotatelogs.WithMaxAge(time.Duration(self.option.maxAge)*24*time.Hour),
+			rotatelogs.WithMaxAge(time.Hour*24*7),
 			rotatelogs.WithRotationTime(time.Hour*24),
 		)
 		if err != nil {
@@ -120,7 +121,7 @@ func (self *FileRotatelogs) GetWriteSyncer(level string) (zapcore.WriteSyncer, e
 		}
 		writer = append(writer, zapcore.AddSync(fileWriter))
 	}
-	if self.option.console || len(writer) == 0 {
+	if f.option.console || len(writer) == 0 {
 		writer = append(writer, zapcore.AddSync(os.Stdout))
 	}
 	return zapcore.NewMultiWriteSyncer(writer...), nil

@@ -2,16 +2,17 @@ package zapx
 
 import (
 	"fmt"
+	"time"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"time"
 )
 
 type Zap struct {
-	prefix, format, stacktraceKey, encodeLevel string
-	level                                      zapcore.Level
-	encoder                                    zapcore.LevelEncoder
-	writeSyncer                                func(level string) (zapcore.WriteSyncer, error)
+	prefix, format, stacktraceKey string
+	level                         zapcore.Level
+	encoder                       zapcore.LevelEncoder
+	writeSyncer                   func(level string) (zapcore.WriteSyncer, error)
 }
 
 func NewZap(prefix, format, stacktraceKey string,
