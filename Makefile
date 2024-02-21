@@ -6,7 +6,6 @@ VETPACKAGES ?= $(shell $(GO) list ./... | grep -v /examples/)
 GOFILES := $(shell find . -name "*.go")
 TESTFOLDER := $(shell $(GO) list ./... |  grep -v examples)
 TESTTAGS ?= ""
-LOCAL_DIR := $(shell pwd)
 
 .PHONY: test
 test:
