@@ -101,7 +101,7 @@ func loadI18n(i18nVals map[string]string, i18nDir string) error {
 	locker.Lock()
 	defer locker.Unlock()
 
-	return filepath.WalkDir(i18nDir, func(path string, d fs.DirEntry, err error) error {
+	return filepath.WalkDir(i18nDir, func(_ string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

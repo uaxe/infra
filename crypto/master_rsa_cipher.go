@@ -96,7 +96,6 @@ func (mrc MasterRsaCipher) Decrypt(cryptoData []byte) ([]byte, error) {
 			return nil, err
 		}
 		return rsa.DecryptPKCS1v15(rand.Reader, priv, cryptoData)
-	} else {
-		return nil, fmt.Errorf("not supported private key,type:%s", block.Type)
 	}
+	return nil, fmt.Errorf("not supported private key,type:%s", block.Type)
 }

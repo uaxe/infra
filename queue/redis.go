@@ -321,7 +321,7 @@ func (q *RedisQueue) Start() error {
 		}
 		q.startTopics(q.work, subChannels...)
 	} else {
-		wakeupQueuePop := func(topic string, raw []byte) error {
+		wakeupQueuePop := func(topic string, _ []byte) error {
 			item, ok := q.topic2Items[topic]
 			if ok {
 				select {

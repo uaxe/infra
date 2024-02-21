@@ -10,7 +10,7 @@ import (
 type Struct2MapOption func(v reflect.Value, f reflect.StructField) (string, bool)
 
 func Struct2MapOptionWithTag(tag string) Struct2MapOption {
-	return func(v reflect.Value, f reflect.StructField) (string, bool) {
+	return func(_ reflect.Value, f reflect.StructField) (string, bool) {
 		j, ok := f.Tag.Lookup(tag)
 		if !ok || j == "-" {
 			return j, false

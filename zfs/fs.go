@@ -223,7 +223,7 @@ func CopyDir(src string, dst string) (err error) {
 
 // SetPermissions recursively sets file permissions on a directory
 func SetPermissions(dir string, perm os.FileMode) error {
-	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	return filepath.Walk(dir, func(path string, _ os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
