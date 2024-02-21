@@ -18,6 +18,7 @@ linters:
     - nolintlint
     - revive
     - wastedassign
+    - unused
 
 linters-settings:
   gosec:
@@ -37,7 +38,6 @@ linters-settings:
 issues:
   exclude-rules:
     - linters:
-        - structcheck
         - unused
       text: "`data` is unused"
     - linters:
