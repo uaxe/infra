@@ -76,7 +76,7 @@ func (l *LRUCache) Put(key, v any, ttl time.Duration) chan time.Time {
 					l.tw.CancelTimer(exist.Timerid)
 				}
 			}
-			timerid, ch := l.tw.AddTimer(ttl, func(t time.Time) {
+			timerid, ch := l.tw.AddTimer(ttl, func(_ time.Time) {
 				l.cache.Remove(key)
 			}, func(_ time.Time) {})
 			vv.Timerid = timerid

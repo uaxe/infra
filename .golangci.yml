@@ -34,9 +34,12 @@ linters-settings:
       - G112
       - G201
       - G203
+
+
 issues:
   exclude-rules:
     - linters:
+        - unused
         - structcheck
       text: "`data` is unused"
     - linters:
